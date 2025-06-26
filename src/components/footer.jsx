@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-center">
           {/* Copyright */}
           <div className="text-gray-600 mb-4 md:mb-0 text-sm md:text-base">
-            &copy; {new Date().getFullYear()} . All rights reserved.
+            &copy; {new Date().getFullYear()} - Fish galaxy. All rights reserved.
           </div>
           
           {/* Social Media Icons */}

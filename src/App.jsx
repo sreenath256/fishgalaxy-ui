@@ -5,32 +5,34 @@ import {
   Route,
   Navigate,
   Outlet,
-  Link
+  Link,
+  useLocation
 } from "react-router-dom";
-import { lazy, Suspense } from 'react';
-import {Header,Footer} from './components'
+import { lazy, Suspense, useState, useEffect } from 'react';
+import { Header, Footer } from './components'
+import Preloader from './components/Preloader';
 
+// Lazy-loaded page components
 const Welcome = lazy(() => import("./pages/welcome"));
+const Home = lazy(() => import("./pages/home"));
 
 // Layout component with header and footer
 const Layout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <Header/>
+      <Header />
 
-      {/* Main content area - Outlet will be replaced by the matched route */}
+      {/* Main content area */}
       <main className="pt-16">
-        <Outlet />
+          <Outlet />
       </main>
 
       {/* Footer */}
-      <Footer/>
+      <Footer />
     </div>
   );
 }
-
-
 
 const NotFound = () => (
   <div className="text-center py-20">
@@ -43,14 +45,29 @@ const NotFound = () => (
 );
 
 function App() {
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  useEffect(() => {
+    // Only show preloader for initial load
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 1500); // Adjust initial load time as needed
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (initialLoading) {
+    return <Preloader />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Wrap all routes with the Layout component */}
         <Route element={<Layout />}>
-          <Route path="/" element={<Welcome />} />ß
-          <Route path="/home" element={<Navigate to="/" replace />} />
-          <Route path="*" element={<p>not found</p>} />
+          <Route path="/" element={<Home />} />
+          <Route path="/welcome" element={<Welcome />} />
+        
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>
