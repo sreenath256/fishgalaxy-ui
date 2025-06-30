@@ -20,6 +20,35 @@ const ProductDetails = lazy(() => import("./pages/productDetails"));
 
 // Layout component with header and footer
 const Layout = () => {
+  const location = useLocation();
+  const [scrollHistory, setScrollHistory] = useState({});
+
+  useEffect(() => {
+    // Restore scroll position when coming back to a page
+    if (scrollHistory[location.key]) {
+      window.scrollTo(0, scrollHistory[location.key]);
+    } else {
+      // Scroll to top for new page loads
+      window.scrollTo(0, 0);
+    }
+
+    // Function to save scroll position before leaving the page
+    const saveScrollPosition = () => {
+      setScrollHistory(prev => ({
+        ...prev,
+        [location.key]: window.scrollY
+      }));
+    };
+
+    // Add event listener for beforeunload
+    window.addEventListener('beforeunload', saveScrollPosition);
+
+    return () => {
+      // Save scroll position when leaving the page
+      saveScrollPosition();
+      window.removeEventListener('beforeunload', saveScrollPosition);
+    };
+  }, [location.key]);
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
