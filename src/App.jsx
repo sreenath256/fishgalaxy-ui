@@ -48,33 +48,38 @@ const NotFound = () => (
 
 function App() {
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
-    // Only show preloader for initial load
     const timer = setTimeout(() => {
       setInitialLoading(false);
-    }, 2000); // Adjust initial load time as needed
+      // Delay showing content slightly to allow preloader to fade out
+      setTimeout(() => setShowContent(true), 300);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
 
-  if (initialLoading) {
-    return <Preloader />;
-  }
-
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/welcome" element={<Welcome />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/shop/:id" element={<ProductDetails />} />
-        
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <>
+      <Preloader isComplete={!initialLoading} />
+      
+      <div className={`transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+        {showContent && (
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/welcome" element={<Welcome />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/shop/:id" element={<ProductDetails />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        )}
+      </div>
+    </>
   );
 }
 

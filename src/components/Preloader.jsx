@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Preloader = ({ onComplete }) => {
-  const [isComplete, setIsComplete] = useState(false);
+const Preloader = ({ isComplete }) => {
   const brandName = "Fish Galaxy";
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsComplete(true);
-      onComplete?.();
-    }, 1000); // Total duration
-
-    return () => clearTimeout(timer);
-  }, [onComplete]);
 
   // Wave animation variants for each letter
   const letterVariants = {
@@ -36,9 +26,14 @@ const Preloader = ({ onComplete }) => {
         <motion.div
           className="fixed inset-0 flex items-center justify-center bg-white z-[9999]"
           initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
           exit={{ 
             opacity: 0,
-            transition: { duration: 0.8, ease: "easeInOut" }
+            transition: { 
+              duration: 0.5, 
+              ease: "easeInOut",
+              delay: 0.2 // Small delay to ensure letters finish their animation
+            }
           }}
         >
           <motion.div className="flex flex-col items-center">
@@ -56,15 +51,6 @@ const Preloader = ({ onComplete }) => {
                 </motion.span>
               ))}
             </div>
-            
-            {/* <motion.p 
-              className="mt-4 text-gray-500 text-lg"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1, duration: 0.2 }}
-            >
-              Diving into amazing aquatic experiences
-            </motion.p> */}
           </motion.div>
         </motion.div>
       )}
