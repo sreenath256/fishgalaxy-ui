@@ -53,7 +53,7 @@ function App() {
     // Only show preloader for initial load
     const timer = setTimeout(() => {
       setInitialLoading(false);
-    }, 1500); // Adjust initial load time as needed
+    }, 2000); // Adjust initial load time as needed
 
     return () => clearTimeout(timer);
   }, []);
