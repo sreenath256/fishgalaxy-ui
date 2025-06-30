@@ -206,7 +206,7 @@ const Shop = () => {
 
                     {/* Products Grid */}
                     {uniqueProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                             {uniqueProducts.map((product, index) => (
                                 <Link to={`/shop/1`}>
                                 <div  key={`${product.id}-${index}`} className="bg-white flex flex-col justify-between rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100">
