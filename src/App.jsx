@@ -15,6 +15,8 @@ import Preloader from './components/Preloader';
 // Lazy-loaded page components
 const Welcome = lazy(() => import("./pages/welcome"));
 const Home = lazy(() => import("./pages/home"));
+const Shop = lazy(() => import("./pages/shop"));
+const ProductDetails = lazy(() => import("./pages/productDetails"));
 
 // Layout component with header and footer
 const Layout = () => {
@@ -66,6 +68,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/welcome" element={<Welcome />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/shop/:id" element={<ProductDetails />} />
         
           <Route path="*" element={<NotFound />} />
         </Route>

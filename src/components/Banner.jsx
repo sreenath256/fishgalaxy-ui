@@ -88,7 +88,7 @@ const Banner = () => {
                 <p className="text-lg md:text-xl mb-6">
                   {bannerData[currentSlide].description}
                 </p>
-                <button className="bg-white text-indigo-600 px-6 py-3 rounded-md font-medium hover:bg-indigo-100 transition-colors duration-300">
+                <button className="bg-white text-mainclr px-6 py-3 rounded-md font-medium hover:bg-indigo-100 transition-colors duration-300">
                   {bannerData[currentSlide].buttonText}
                 </button>
               </motion.div>

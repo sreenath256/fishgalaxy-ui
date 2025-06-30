@@ -66,4 +66,13 @@ select::placeholder {
 }
 
 
+.swiper-pagination-bullet {
+  opacity: 1 !important;
+  background: #dbdbdb !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: #4F45E4 !important;
+}
+
 

@@ -1,10 +1,13 @@
 import React from 'react'
-import { Banner } from '../components'
+import { Banner, CategoriesCarousel,Bestoffers, NewArrivlas } from '../components'
 
 const Home = () => {
   return (
     <div>
       <Banner/>
+      <CategoriesCarousel/>
+      <Bestoffers/>
+      <NewArrivlas/>
     </div>
   )
 }

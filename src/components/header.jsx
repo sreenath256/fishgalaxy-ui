@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CgMenuRight } from "react-icons/cg";
 import { VscClose } from "react-icons/vsc";
 import { Link } from 'react-router-dom';
+import { MdAccountCircle } from "react-icons/md";
+import { IoMdCart } from "react-icons/io";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,7 +45,7 @@ const Header = () => {
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center">
               <svg
-                className="h-8 w-8 text-indigo-600"
+                className="h-8 w-8 text-mainclr"
                 viewBox="0 0 24 24"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -67,7 +69,7 @@ const Header = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`${item.active ? 'text-gray-900' : 'text-gray-500'} hover:text-indigo-600 px-3 py-2 text-sm font-medium`}
+                className={`${item.active ? 'text-gray-900' : 'text-gray-500'} hover:text-mainclr px-3 py-2 text-sm font-medium`}
               >
                 {item.name}
               </Link>
@@ -75,18 +77,33 @@ const Header = () => {
           </nav>
 
           {/* Login button and mobile menu button */}
-          <div className="flex items-center">
-            <Link 
+          <div className="flex items-center gap-5">
+            {/* <Link 
               to="/login" 
-              className="hidden md:inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-maintext-mainclr hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Login
+            </Link> */}
+            <Link 
+              to="/login" 
+              className="flex items-center px-2 md:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr"
+            >
+              <MdAccountCircle className='md:mr-2 text-xl'/>
+              <p className='hidden md:block'>Account</p>
             </Link>
+            <Link 
+              to="/login" 
+              className="relative flex items-center text-xs font-medium rounded-md text-indigo-500"
+            >
+              <IoMdCart className='mr-2 text-2xl'/>
+              <span className='absolute right-0 -top-1 text-indigo-500'>2</span>
+            </Link>
+
             
             {/* Mobile menu button */}
             <button 
               onClick={toggleMobileMenu}
-              className="mobile-menu-button md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              className="mobile-menu-button md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-mainclr"
             >
               <span className="sr-only">Open main menu</span>
               {isMobileMenuOpen ? (
@@ -109,7 +126,7 @@ const Header = () => {
             <Link
               key={item.name}
               to={item.path}
-              className={`block pl-3 pr-4 py-2 text-base font-medium ${item.active ? 'text-gray-900' : 'text-gray-500'} hover:bg-gray-50 hover:text-indigo-600 rounded-md transition-colors duration-200`}
+              className={`block pl-3 pr-4 py-2 text-base font-medium ${item.active ? 'text-gray-900' : 'text-gray-500'} hover:bg-gray-50 hover:text-mainclr rounded-md transition-colors duration-200`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.name}
@@ -118,7 +135,7 @@ const Header = () => {
           <div className="mt-4 mb-2">
             <Link 
               to="/login"
-              className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors duration-200"
+              className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr transition-colors duration-200"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Login

@@ -14,8 +14,8 @@ export default {
     extend: {
         
       colors: {
-        mainclr: "#e93400",
-        mainhvr: "#c22b00",
+        mainclr: "#4F45E4",
+        mainhvr: "#4337C9",
       },
      
       backgroundImage: {
