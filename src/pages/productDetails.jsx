@@ -8,6 +8,7 @@ const ProductPage = () => {
   const [mainImage, setMainImage] = useState(product?.images[0] || '');
   const [zoomStyle, setZoomStyle] = useState({});
   const [isHovering, setIsHovering] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   if (!product) {
     return (
@@ -48,6 +49,18 @@ const ProductPage = () => {
     }, 200);
     setIsHovering(false);
     document.body.style.cursor = 'default';
+  };
+
+  const increaseQuantity = () => {
+    if (quantity < product.stock) {
+      setQuantity(quantity + 1);
+    }
+  };
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
   };
 
   return (
@@ -119,15 +132,36 @@ const ProductPage = () => {
              product.stock > 0 ? `Only ${product.stock} left` : 'Out of Stock'}
           </div>
           
+          {/* Quantity Controls */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center border border-gray-300 rounded-md">
+              <button 
+                onClick={decreaseQuantity}
+                className="px-3 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
+                disabled={quantity <= 1}
+              >
+                -
+              </button>
+              <span className="px-4 py-1 text-center w-12">{quantity}</span>
+              <button 
+                onClick={increaseQuantity}
+                className="px-3 py-1 text-gray-600 hover:bg-gray-100 disabled:opacity-30"
+                disabled={quantity >= product.stock}
+              >
+                +
+              </button>
+            </div>
+          
+          </div>
+          
           {/* Buttons */}
           <div className="flex flex-wrap gap-4">
             <button 
               className="bg-mainclr hover:bg-mainhvr text-white px-6 py-3 rounded-md font-medium transition-colors disabled:opacity-50"
               disabled={product.stock <= 0}
             >
-              ADD TO CART
+              ADD TO CART ({quantity})
             </button>
-            
           </div>
           
           {/* Description */}
@@ -150,7 +184,6 @@ const ProductPage = () => {
                 <span className="font-medium w-32">Categories:</span>
                 <span>{product.categories.join(', ')}</span>
               </div>
-             
             </div>
           </div>
         </div>

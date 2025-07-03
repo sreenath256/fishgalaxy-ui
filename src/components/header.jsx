@@ -1,20 +1,37 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { CgMenuRight } from "react-icons/cg";
 import { VscClose } from "react-icons/vsc";
-import { Link } from 'react-router-dom';
-import { MdAccountCircle } from "react-icons/md";
+import { Link } from "react-router-dom";
+import { MdAccountCircle, MdLogout, MdManageAccounts, MdShoppingBag } from "react-icons/md";
 import { IoMdCart } from "react-icons/io";
+import AllcategModal from "../components/products/allCateogmodal";
+import { categoryImages } from "./Data";
+import CartModal from "./products/CartModal";
+import { pr1 } from "../assets";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+  const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
+
+  // Get all unique categories from the categoryImages object
+  const categories = Object.keys(categoryImages);
+
   const menuRef = useRef(null);
+  const profileRef = useRef(null);
 
   // Menu items array
   const menuItems = [
     { name: "Home", path: "/", active: true },
     { name: "Shop", path: "/shop", active: false },
     { name: "Cart", path: "/cart", active: false },
-    { name: "About", path: "/about", active: false }
+    { name: "About", path: "/about", active: false },
   ];
 
   const toggleMobileMenu = () => {
@@ -23,19 +40,36 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isMobileMenuOpen && menuRef.current && !menuRef.current.contains(event.target)) {
-        const menuButton = document.querySelector('.mobile-menu-button');
+      // Close mobile menu if clicked outside
+      if (
+        isMobileMenuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target)
+      ) {
+        const menuButton = document.querySelector(".mobile-menu-button");
         if (menuButton && !menuButton.contains(event.target)) {
           setIsMobileMenuOpen(false);
         }
       }
+      
+      // Close profile modal if clicked outside
+      if (
+        isProfileOpen &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target)
+      ) {
+        const profileButton = document.querySelector(".profile-button");
+        if (profileButton && !profileButton.contains(event.target)) {
+          setIsProfileOpen(false);
+        }
+      }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, isProfileOpen]);
 
   return (
     <header className="bg-white shadow-sm fixed w-full top-0 z-50">
@@ -59,17 +93,21 @@ const Header = () => {
                   fill="white"
                 />
               </svg>
-              <span className="ml-2 text-xl font-medium text-gray-900">Fish Galaxy</span>
+              <span className="ml-2 text-xl font-medium text-gray-900">
+                Fish Galaxy
+              </span>
             </Link>
           </div>
 
           {/* Navigation (hidden on mobile) */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden lg:flex space-x-8">
             {menuItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
-                className={`${item.active ? 'text-gray-900' : 'text-gray-500'} hover:text-mainclr px-3 py-2 text-sm font-medium`}
+                className={`${
+                  item.active ? "text-gray-900" : "text-gray-500"
+                } hover:text-mainclr px-3 py-2 text-sm font-medium`}
               >
                 {item.name}
               </Link>
@@ -78,32 +116,81 @@ const Header = () => {
 
           {/* Login button and mobile menu button */}
           <div className="flex items-center gap-5">
-            {/* <Link 
-              to="/login" 
-              className="flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-maintext-mainclr hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            <button
+              onClick={openModal}
+              className="hidden lg:block w-full px-2 md:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr"
             >
-              Login
-            </Link> */}
-            <Link 
-              to="/login" 
-              className="flex items-center px-2 md:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr"
-            >
-              <MdAccountCircle className='md:mr-2 text-xl'/>
-              <p className='hidden md:block'>Account</p>
-            </Link>
-            <Link 
-              to="/login" 
-              className="relative flex items-center text-xs font-medium rounded-md text-indigo-500"
-            >
-              <IoMdCart className='mr-2 text-2xl'/>
-              <span className='absolute right-0 -top-1 text-indigo-500'>2</span>
-            </Link>
-
+              <p className="capitalize">view all categories</p>
+            </button>
             
+            {/* Profile button and dropdown */}
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={toggleProfile}
+                className="profile-button flex items-center border border-transparent text-sm font-medium rounded-full text-mainclr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr"
+              >
+                <MdAccountCircle className="text-3xl" />
+              </button>
+              
+              {/* Profile dropdown */}
+              {isProfileOpen && (
+                <div className="absolute -left-10 md:left-auto md:right-0 mt-5 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                  <div className="px-4 py-2 border-b border-gray-200">
+                    <div className="flex items-center">
+                      <img 
+                        className="h-8 w-8 rounded-full object-cover" 
+                        src={pr1} 
+                        alt="User" 
+                      />
+                      <div className="ml-2">
+                        <p className="text-sm font-medium text-gray-900">John Doe</p>
+                        <p className="text-xs text-gray-500">john@example.com</p>
+                      </div>
+                    </div>
+                  </div>
+                  <Link
+                    to="/"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <MdManageAccounts className="mr-2" />
+                    Manage Profile
+                  </Link>
+                  <Link
+                    to="/"
+                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    <MdShoppingBag className="mr-2" />
+                    My Orders
+                  </Link>
+                  <button
+                    className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => {
+                      // Handle logout logic here
+                      setIsProfileOpen(false);
+                    }}
+                  >
+                    <MdLogout className="mr-2" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+            
+            {/* Cart button */}
+            <div
+              onClick={openCart}
+              className="relative cursor-pointer flex items-center font-medium rounded-md text-mainclr"
+            >
+              <IoMdCart className="mr-2 text-2xl" />
+              <span className="absolute bg-red-500 w-4 h-4 rounded-full text-[10px] grid place-items-center  -right-1 -top-2 text-white">2</span>
+            </div>
+
             {/* Mobile menu button */}
-            <button 
+            <button
               onClick={toggleMobileMenu}
-              className="mobile-menu-button md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-mainclr"
+              className="mobile-menu-button lg:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-mainclr"
             >
               <span className="sr-only">Open main menu</span>
               {isMobileMenuOpen ? (
@@ -117,32 +204,55 @@ const Header = () => {
       </div>
 
       {/* Mobile menu with animation */}
-      <div 
+      <div
         ref={menuRef}
-        className={`md:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
+        className={`lg:hidden transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen
+            ? "max-h-96 opacity-100"
+            : "max-h-0 opacity-0 overflow-hidden"
+        }`}
       >
         <div className="pt-2 pb-3 space-y-1 px-4 bg-white shadow-md">
           {menuItems.map((item) => (
             <Link
               key={item.name}
               to={item.path}
-              className={`block pl-3 pr-4 py-2 text-base font-medium ${item.active ? 'text-gray-900' : 'text-gray-500'} hover:bg-gray-50 hover:text-mainclr rounded-md transition-colors duration-200`}
+              className={`block pl-3 pr-4 py-2 text-base font-medium ${
+                item.active ? "text-gray-900" : "text-gray-500"
+              } hover:bg-gray-50 hover:text-mainclr rounded-md transition-colors duration-200`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.name}
             </Link>
           ))}
-          <div className="mt-4 mb-2">
-            <Link 
-              to="/login"
-              className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr transition-colors duration-200"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Login
-            </Link>
-          </div>
+          <button
+            onClick={openModal}
+            className="w-full px-2 md:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr"
+          >
+            <p className="uppercase">view all categories</p>
+          </button>
         </div>
       </div>
+
+      {/* All Categories Modal */}
+      <AllcategModal isOpen={isModalOpen} onClose={closeModal}>
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">All Categories</h2>
+          <ul className="space-y-2">
+            {categories.map((category, i) => (
+              <li
+                key={i}
+                className="p-2 hover:bg-gray-100 hover:text-mainclr duration-200 cursor-pointer"
+              >
+                {category}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </AllcategModal>
+
+      {/* Cart Modal */}
+      <CartModal isOpen={isCartOpen} onClose={closeCart} />
     </header>
   );
 };

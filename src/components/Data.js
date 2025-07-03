@@ -79,7 +79,7 @@ export const aquariumProducts = [
     price: 29.99,
     offerPrice: 19.99,
     stock: 30,
-    categories: ["Best Offers", "Aquarium Filters"],
+    categories: ["Best Offers", "Aquarium Filters","New Arrivals"],
     images: [p1, p2, p3, p4],
     description: "Efficient and quiet filtration for small to medium tanks.",
   },
