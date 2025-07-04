@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { FiTruck } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { pr1 } from '../assets';
 
 const Checkout = () => {
+  const navigate = useNavigate();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
   // Sample cart items
   const cartItems = [
     { id: 1, name: 'Premium Fish Food', price: 24.99, quantity: 2, image: pr1 },
@@ -15,6 +18,16 @@ const Checkout = () => {
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
+  const handlePlaceOrder = (e) => {
+    e.preventDefault();
+    setIsPlacingOrder(true);
+    
+    // Simulate processing delay
+    setTimeout(() => {
+      navigate('/success');
+    }, 2000);
+  };
+
   return (
     <div className="w-[95%] md:w-11/12 mx-auto py-8">
       <h1 className="text-2xl font-semibold mb-5 md:mb-8">Checkout</h1>
@@ -22,7 +35,7 @@ const Checkout = () => {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Column - Shipping Form */}
         <div className="lg:w-2/3">
-          <div className="bg-white rounded-lg border shadow-md p-6">
+          <form onSubmit={handlePlaceOrder} className="bg-white rounded-lg border shadow-md p-6">
             <h2 className="text-xl font-bold mb-6 flex items-center">
               <FiTruck className="mr-2" /> Shipping Information
             </h2>
@@ -83,7 +96,6 @@ const Checkout = () => {
                     <option>Calicut</option>
                     <option>Malappuram</option>
                     <option>Kollam</option>
-                    
                   </select>
                 </div>
                 <div>
@@ -127,11 +139,17 @@ const Checkout = () => {
             </div>
 
             <div className="mt-8">
-              <button className="w-full bg-mainclr text-white py-3 rounded-md hover:bg-mainhvr transition-colors font-medium">
-                Place Order
+              <button 
+                type="submit"
+                disabled={isPlacingOrder}
+                className={`w-full bg-mainclr text-white py-3 rounded-md hover:bg-mainhvr transition-colors font-medium ${
+                  isPlacingOrder ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
+              >
+                {isPlacingOrder ? 'Processing...' : 'Place Order'}
               </button>
             </div>
-          </div>
+          </form>
         </div>
 
         {/* Right Column - Order Summary */}
@@ -146,7 +164,7 @@ const Checkout = () => {
                     <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded mr-2" />
                     <span>{item.name} × {item.quantity}</span>
                   </div>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { VscClose } from "react-icons/vsc";
 import { pr1 } from "../../assets";
+import { Link } from "react-router-dom";
 
 const CartModal = ({ isOpen, onClose, children }) => {
   // Initialize products with quantity
@@ -148,9 +149,11 @@ const CartModal = ({ isOpen, onClose, children }) => {
             <p className="text-xs text-gray-500 mb-4">
               Shipping and taxes calculated at checkout
             </p>
+            <Link to={'/checkout'}  onClick={onClose}>
             <button className="w-full bg-mainclr hover:bg-mainhvr text-white py-2 rounded-md">
               Checkout
             </button>
+            </Link>
             <button
               onClick={onClose}
               className="w-full mt-2 text-mainclr hover:text-mainhvr py-2"

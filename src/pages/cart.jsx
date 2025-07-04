@@ -36,6 +36,7 @@ const CartPage = () => {
           quantity: 1,
           id: 4
         },
+       
       ]);
     
       // Increment quantity
@@ -172,7 +173,7 @@ const CartPage = () => {
           
           {/* Order Summary */}
           <div className="lg:w-1/3">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg border shadow-md p-6 sticky top-20">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
               
               <div className="space-y-4 mb-6">

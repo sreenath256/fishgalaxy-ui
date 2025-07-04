@@ -18,6 +18,9 @@ const Home = lazy(() => import("./pages/home"));
 const Shop = lazy(() => import("./pages/shop"));
 const Cart = lazy(() => import("./pages/cart"));
 const Checkout = lazy(() => import("./pages/checkout"));
+const Success = lazy(() => import("./pages/success"));
+const Profile = lazy(() => import("./pages/profile"));
+const Myorders = lazy(() => import("./pages/myOrders"));
 const ProductDetails = lazy(() => import("./pages/productDetails"));
 
 // Layout component with header and footer
@@ -105,6 +108,9 @@ function App() {
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/success" element={<Success />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/my-order" element={<Myorders />} />
                 <Route path="/shop/:id" element={<ProductDetails />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
