@@ -114,7 +114,7 @@ const ProtectedRoute = ({ userType, allowedRoles, children }) => {
   const location = useLocation();
 
   // In a real app, you would check the user's role from auth context
-  const currentUserRole = "admin"; // user,retailer,admin
+  const currentUserRole = "retailer"; // user,retailer,admin
 
   if (!allowedRoles.includes(currentUserRole)) {
     // Redirect them to the appropriate page based on their role
