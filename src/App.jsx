@@ -1,4 +1,4 @@
-import './App.css'
+import "./App.css";
 import {
   BrowserRouter,
   Routes,
@@ -6,15 +6,25 @@ import {
   Navigate,
   Outlet,
   Link,
-  useLocation
+  useLocation,
 } from "react-router-dom";
-import { lazy, Suspense, useState, useEffect } from 'react';
-import { Header, Footer } from './components'
-import Preloader from './components/Preloader';
+import { lazy, Suspense, useState, useEffect } from "react";
+import {
+  Header,
+  Footer,
+  AdminSidebar,
+  UserHeader,
+  UserFooter,
+} from "./components";
+import Preloader from "./components/Preloader";
 
-// Lazy-loaded page components
+//  page components
 const Welcome = lazy(() => import("./pages/welcome"));
+const NotFound = lazy(() => import("./pages/notfound"));
+
+
 const Home = lazy(() => import("./pages/home"));
+const About = lazy(() => import("./pages/about"));
 const Shop = lazy(() => import("./pages/shop"));
 const Cart = lazy(() => import("./pages/cart"));
 const Checkout = lazy(() => import("./pages/checkout"));
@@ -23,62 +33,100 @@ const Profile = lazy(() => import("./pages/profile"));
 const Myorders = lazy(() => import("./pages/myOrders"));
 const ProductDetails = lazy(() => import("./pages/productDetails"));
 
-// Layout component with header and footer
-const Layout = () => {
+// admin
+const Dashboard = lazy(() => import("./pages/admin/dashboard"));
+const Orders = lazy(() => import("./pages/admin/orders"));
+const Retailers = lazy(() => import("./pages/admin/retailer"));
+const AllProducts = lazy(() => import("./pages/admin/allProducts"));
+const AddProducts = lazy(() => import("./pages/admin/addProducts"));
+const AllCategory = lazy(() => import("./pages/admin/allCategories"));
+
+// Common layout with header and footer
+const CommonLayout = () => {
   const location = useLocation();
   const [scrollHistory, setScrollHistory] = useState({});
 
   useEffect(() => {
-    // Restore scroll position when coming back to a page
     if (scrollHistory[location.key]) {
       window.scrollTo(0, scrollHistory[location.key]);
     } else {
-      // Scroll to top for new page loads
       window.scrollTo(0, 0);
     }
 
-    // Function to save scroll position before leaving the page
     const saveScrollPosition = () => {
-      setScrollHistory(prev => ({
+      setScrollHistory((prev) => ({
         ...prev,
-        [location.key]: window.scrollY
+        [location.key]: window.scrollY,
       }));
     };
 
-    // Add event listener for beforeunload
-    window.addEventListener('beforeunload', saveScrollPosition);
+    window.addEventListener("beforeunload", saveScrollPosition);
 
     return () => {
-      // Save scroll position when leaving the page
       saveScrollPosition();
-      window.removeEventListener('beforeunload', saveScrollPosition);
+      window.removeEventListener("beforeunload", saveScrollPosition);
     };
   }, [location.key]);
+
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <Header />
-
-      {/* Main content area */}
+      <UserHeader />
       <main className="pt-16">
-          <Outlet />
+        <Outlet />
       </main>
+      <UserFooter />
+    </div>
+  );
+};
 
-      {/* Footer */}
+const AdminLayout = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar - fixed width */}
+      <div className="md:w-64 fixed h-full bg-gray-800 text-white">
+        <AdminSidebar />
+      </div>
+      {/* Main content with outlet */}
+      <main className="flex-1 flex flex-col pt-16 md:pt-5 md:ml-64 p-5">
+        <Outlet />
+      </main>
+    </div>
+  );
+};
+
+// Retailer layout (could have different header/footer)
+const RetailerLayout = () => {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="">
+        <Outlet />
+      </main>
       <Footer />
     </div>
   );
-}
+};
 
-const NotFound = () => (
-  <div className="text-center py-20">
-    <h1 className="text-5xl font-bold text-red-600 mb-4">404</h1>
-    <p className="text-xl">Page not found</p>
-    <Link to="/" className="text-blue-600 hover:underline mt-4 inline-block">
-      Return to Home
-    </Link>
-  </div>
-);
+
+
+// Protected route component
+const ProtectedRoute = ({ userType, allowedRoles, children }) => {
+  const location = useLocation();
+
+  // In a real app, you would check the user's role from auth context
+  const currentUserRole = "admin"; // user,retailer,admin
+
+  if (!allowedRoles.includes(currentUserRole)) {
+    // Redirect them to the appropriate page based on their role
+    let redirectPath = "/welcome";
+    if (currentUserRole === "admin") redirectPath = "/dashboard";
+    if (currentUserRole === "retailer") redirectPath = "/";
+
+    return <Navigate to={redirectPath} state={{ from: location }} replace />;
+  }
+
+  return children ? children : <Outlet />;
+};
 
 function App() {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -87,7 +135,6 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setInitialLoading(false);
-      // Delay showing content slightly to allow preloader to fade out
       setTimeout(() => setShowContent(true), 300);
     }, 2000);
 
@@ -97,22 +144,47 @@ function App() {
   return (
     <>
       <Preloader isComplete={!initialLoading} />
-      
-      <div className={`transition-opacity duration-500 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+
+      <div
+        className={`transition-opacity duration-500 ${
+          showContent ? "opacity-100" : "opacity-0"
+        }`}
+      >
         {showContent && (
           <BrowserRouter>
             <Routes>
-              <Route element={<Layout />}>
-                <Route path="/" element={<Home />} />
+              {/* User specific routes */}
+              <Route element={<CommonLayout />}>
                 <Route path="/welcome" element={<Welcome />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/success" element={<Success />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/my-order" element={<Myorders />} />
-                <Route path="/shop/:id" element={<ProductDetails />} />
                 <Route path="*" element={<NotFound />} />
+              </Route>
+
+              {/* Retailer specific routes */}
+              <Route element={<ProtectedRoute allowedRoles={["retailer"]} />}>
+                <Route element={<RetailerLayout />}>
+                  <Route path="/" element={<Home />} />
+
+                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/success" element={<Success />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/my-order" element={<Myorders />} />
+                  <Route path="/shop/:id" element={<ProductDetails />} />
+                </Route>
+              </Route>
+
+              {/* Admin specific routes */}
+              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                <Route element={<AdminLayout />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/retailers" element={<Retailers />} />
+                  <Route path="/products/all" element={<AllProducts />} />
+                  <Route path="/products/add" element={<AddProducts />} />
+                  <Route path="/products/categories" element={<AllCategory />} />
+                </Route>
               </Route>
             </Routes>
           </BrowserRouter>
