@@ -81,7 +81,7 @@ const CommonLayout = () => {
 
 const AdminLayout = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex overflow-hidden">
       {/* Sidebar - fixed width */}
       <div className="md:w-64 fixed h-full bg-gray-800 text-white">
         <AdminSidebar />
@@ -99,7 +99,7 @@ const RetailerLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="">
+      <main className="pt-16">
         <Outlet />
       </main>
       <Footer />

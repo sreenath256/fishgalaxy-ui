@@ -77,10 +77,10 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed md:relative z-40 w-64 min-h-screen bg-gray-100 text-black flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed md:relative z-40 w-64 h-screen bg-gray-100 text-black flex flex-col transition-transform duration-300 ease-in-out ${
           isMobile
             ? isMobileSidebarOpen
-              ? "translate-x-0"
+              ? "translate-x-0 "
               : "-translate-x-full"
             : "translate-x-0"
         }`}
@@ -91,80 +91,82 @@ const Sidebar = () => {
         </div>
 
         {/* Sidebar Menu */}
-        <ul className="flex-1 flex flex-col gap-2 py-4 overflow-y-auto">
-          {menuItems.map((item, index) => (
-            <React.Fragment key={index}>
-              {item.path ? (
-                // Regular menu item with link
-                <li className="px-2">
-                  <NavLink
-                    to={item.path}
-                    onClick={closeAllMenus}
-                    className={({ isActive }) =>
-                      `flex items-center p-3 rounded-lg transition-colors ${
-                        isActive
-                          ? "bg-gray-200 text-black"
-                          : "text-black hover:bg-gray-200"
-                      }`
-                    }
-                  >
-                    <span className="mr-3 text-lg">{item.icon}</span>
-                    <span>{item.name}</span>
-                  </NavLink>
-                </li>
-              ) : (
-                // Menu item with submenu
-                <li className="px-2">
-                  <button
-                    onClick={() => toggleSubmenu(item.id)}
-                    className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors ${
-                      openSubmenu === item.id
-                        ? "bg-gray-200 text-black"
-                        : "text-black hover:bg-gray-200"
-                    }`}
-                  >
-                    <div className="flex items-center">
+        <div className="flex-1 overflow-y-auto">
+          <ul className="flex flex-col gap-2 py-4">
+            {menuItems.map((item, index) => (
+              <React.Fragment key={index}>
+                {item.path ? (
+                  // Regular menu item with link
+                  <li className="px-2">
+                    <NavLink
+                      to={item.path}
+                      onClick={closeAllMenus}
+                      className={({ isActive }) =>
+                        `flex items-center p-3 rounded-lg transition-colors ${
+                          isActive
+                            ? "bg-gray-200 text-black"
+                            : "text-black hover:bg-gray-200"
+                        }`
+                      }
+                    >
                       <span className="mr-3 text-lg">{item.icon}</span>
                       <span>{item.name}</span>
-                    </div>
-                    {openSubmenu === item.id ? (
-                      <FiChevronDown />
-                    ) : (
-                      <FiChevronRight />
-                    )}
-                  </button>
+                    </NavLink>
+                  </li>
+                ) : (
+                  // Menu item with submenu
+                  <li className="px-2">
+                    <button
+                      onClick={() => toggleSubmenu(item.id)}
+                      className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors ${
+                        openSubmenu === item.id
+                          ? "bg-gray-200 text-black"
+                          : "text-black hover:bg-gray-200"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <span className="mr-3 text-lg">{item.icon}</span>
+                        <span>{item.name}</span>
+                      </div>
+                      {openSubmenu === item.id ? (
+                        <FiChevronDown />
+                      ) : (
+                        <FiChevronRight />
+                      )}
+                    </button>
 
-                  {/* Submenu with smooth transition */}
-                  <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      openSubmenu === item.id ? "max-h-96" : "max-h-0"
-                    }`}
-                  >
-                    <ul className="ml-8 mt-2 space-y-2">
-                      {item.submenu.map((subItem, subIndex) => (
-                        <li key={subIndex}>
-                          <NavLink
-                            to={subItem.path}
-                            onClick={handleSubmenuItemClick} // Changed from closeAllMenus to handleSubmenuItemClick
-                            className={({ isActive }) =>
-                              `block p-2 pl-4 rounded-lg transition-colors ${
-                                isActive
-                                  ? "bg-gray-200 text-black"
-                                  : "text-black hover:bg-gray-200"
-                              }`
-                            }
-                          >
-                            {subItem.name}
-                          </NavLink>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </li>
-              )}
-            </React.Fragment>
-          ))}
-        </ul>
+                    {/* Submenu with smooth transition */}
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                        openSubmenu === item.id ? "max-h-96" : "max-h-0"
+                      }`}
+                    >
+                      <ul className="ml-8 mt-2 space-y-2">
+                        {item.submenu.map((subItem, subIndex) => (
+                          <li key={subIndex}>
+                            <NavLink
+                              to={subItem.path}
+                              onClick={handleSubmenuItemClick}
+                              className={({ isActive }) =>
+                                `block p-2 pl-4 rounded-lg transition-colors ${
+                                  isActive
+                                    ? "bg-gray-200 text-black"
+                                    : "text-black hover:bg-gray-200"
+                                }`
+                              }
+                            >
+                              {subItem.name}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </li>
+                )}
+              </React.Fragment>
+            ))}
+          </ul>
+        </div>
 
         {/* Sidebar Footer */}
         <div className="p-4 bg-gray-200 text-black">

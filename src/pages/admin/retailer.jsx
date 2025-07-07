@@ -94,8 +94,90 @@ const Retailer = () => {
       location: 'Lucknow, Uttar Pradesh',
       active: true,
       joinDate: 'Jan 30, 2023'
+    },
+    {
+      id: 11,
+      name: 'Blue Lagoon',
+      mobile: '+91 99887 77665',
+      location: 'Bhopal, Madhya Pradesh',
+      active: false,
+      joinDate: 'Jan 15, 2023'
+    },
+    {
+      id: 12,
+      name: 'Sea Breeze',
+      mobile: '+91 88776 66554',
+      location: 'Surat, Gujarat',
+      active: true,
+      joinDate: 'Dec 30, 2022'
+    },
+    {
+      id: 13,
+      name: 'Oceanic Bliss',
+      mobile: '+91 77665 55443',
+      location: 'Nagpur, Maharashtra',
+      active: true,
+      joinDate: 'Dec 15, 2022'
+    },
+    {
+      id: 14,
+      name: 'Neptune Nook',
+      mobile: '+91 66554 44332',
+      location: 'Indore, Madhya Pradesh',
+      active: false,
+      joinDate: 'Nov 30, 2022'
+    },
+    {
+      id: 15,
+      name: 'Sea Shore',
+      mobile: '+91 55443 33221',
+      location: 'Vadodara, Gujarat',
+      active: true,
+      joinDate: 'Nov 15, 2022'
+    },
+    {
+      id: 16,
+      name: 'Marine Magic',
+      mobile: '+91 44332 22110',
+      location: 'Coimbatore, Tamil Nadu',
+      active: true,
+      joinDate: 'Oct 30, 2022'
+    },
+    {
+      id: 17,
+      name: 'Aquatic Emporium',
+      mobile: '+91 33221 11009',
+      location: 'Thiruvananthapuram, Kerala',
+      active: false,
+      joinDate: 'Oct 15, 2022'
+    },
+    {
+      id: 18,
+      name: 'Fishy Delights',
+      mobile: '+91 22110 00998',
+      location: 'Ranchi, Jharkhand',
+      active: true,
+      joinDate: 'Sep 30, 2022'
+    },
+    {
+      id: 19,
+      name: 'Oceanic Vibes',
+      mobile: '+91 11009 99887',
+      location: 'Patna, Bihar',
+      active: true,
+      joinDate: 'Sep 15, 2022'
+    },
+    {
+      id: 20,
+      name: 'Aqua Culture',
+      mobile: '+91 00998 88776',
+      location: 'Raipur, Chhattisgarh',
+      active: false,
+      joinDate: 'Aug 30, 2022'
     }
   ]);
+
+
 
   // State for filters, search, pagination, and modal
   const [searchTerm, setSearchTerm] = useState('');
@@ -103,7 +185,7 @@ const Retailer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRetailer, setSelectedRetailer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const retailersPerPage = 8;
+  const retailersPerPage = 10;
 
   // Filter and search logic
   const filteredRetailers = allRetailers.filter(retailer => {
@@ -143,18 +225,18 @@ const Retailer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 ">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white shadow rounded-lg overflow-hidden">
           {/* Header with search and filter */}
-          <div className="px-6 py-5 border-b border-gray-200">
+          <div className="px-6 py-5 border-b border-gray-200 ">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div className="flex items-center mb-4 md:mb-0">
                 <h1 className="text-xl font-medium text-gray-800">Retailer Users</h1>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-3 ">
-                <div className="relative">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative ">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FiSearch className="text-gray-400" />
                   </div>
@@ -215,7 +297,7 @@ const Retailer = () => {
                   currentRetailers.map((retailer) => (
                     <tr key={retailer.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{retailer.name}</div>
+                        <div className="text-sm font-medium text-mainclr">{retailer.name}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">{retailer.mobile}</div>
