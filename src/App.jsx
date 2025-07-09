@@ -26,6 +26,7 @@ const Welcome = lazy(() => import("./pages/welcome"));
 const NotFound = lazy(() => import("./pages/notfound"));
 
 
+const LoginSignup = lazy(() => import("./pages/loginSignup"));
 const Home = lazy(() => import("./pages/home"));
 const About = lazy(() => import("./pages/about"));
 const Shop = lazy(() => import("./pages/shop"));
@@ -126,7 +127,7 @@ function App() {
   const ProtectedRoute = ({ element }) => {
     const { user } = useSelector((state) => state.user);
 
-    return true ? element : <Navigate to="/login" />;
+    return user ? element : <Navigate to="/login" />;
   };
 
 
@@ -155,7 +156,7 @@ function App() {
               <Route
                 path="/"
                 element={
-                  true ? (
+                  user ? (
                     user?.role === "admin" || user?.role === "superAdmin" ? (
                       <Navigate to="/admin/" />
                     ) : (
@@ -188,6 +189,7 @@ function App() {
 
               {/* User specific routes */}
               <Route element={<CommonLayout />}>
+                <Route path="/login" element={<LoginSignup />} />
                 <Route path="/welcome" element={<Welcome />} />
                 <Route path="*" element={<NotFound />} />
               </Route>

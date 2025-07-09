@@ -8,6 +8,7 @@ import AllcategModal from "../components/products/allCateogmodal";
 import { categoryImages } from "./Data";
 import CartModal from "./products/CartModal";
 import { pr1 } from "../assets";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,6 +21,9 @@ const Header = () => {
   const closeModal = () => setIsModalOpen(false);
   const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
 
+  const { user } = useSelector((state) => state.user);
+
+
   // Get all unique categories from the categoryImages object
   const categories = Object.keys(categoryImages);
 
@@ -30,7 +34,7 @@ const Header = () => {
   const menuItems = [
     { name: "Home", path: "/", active: true },
     { name: "Shop", path: "/shop", active: false },
-    { name: "Cart", path: "/cart", active: false },
+    // { name: "Cart", path: "/cart", active: false },
     { name: "About", path: "/about", active: false },
   ];
 
@@ -51,7 +55,7 @@ const Header = () => {
           setIsMobileMenuOpen(false);
         }
       }
-      
+
       // Close profile modal if clicked outside
       if (
         isProfileOpen &&
@@ -105,9 +109,8 @@ const Header = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`${
-                  item.active ? "text-gray-900" : "text-gray-500"
-                } hover:text-mainclr px-3 py-2 text-sm font-medium`}
+                className={`${item.active ? "text-gray-900" : "text-gray-500"
+                  } hover:text-mainclr px-3 py-2 text-sm font-medium`}
               >
                 {item.name}
               </Link>
@@ -122,7 +125,7 @@ const Header = () => {
             >
               <p className="capitalize">view all categories</p>
             </button>
-            
+
             {/* Profile button and dropdown */}
             <div className="relative" ref={profileRef}>
               <button
@@ -131,20 +134,23 @@ const Header = () => {
               >
                 <MdAccountCircle className="text-3xl" />
               </button>
-              
+
               {/* Profile dropdown */}
               {isProfileOpen && (
                 <div className="absolute -left-10 md:left-auto md:right-0 mt-5 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                   <div className="px-4 py-2 border-b border-gray-200">
                     <div className="flex items-center">
-                      <img 
-                        className="h-8 w-8 rounded-full object-cover" 
-                        src={pr1} 
-                        alt="User" 
+                      <img
+                        className="h-8 w-8 rounded-full object-cover"
+                        src={pr1}
+                        alt="User"
                       />
                       <div className="ml-2">
-                        <p className="text-sm font-medium text-gray-900">John Doe</p>
-                        <p className="text-xs text-gray-500">john@example.com</p>
+                        <p className="text-sm font-medium text-gray-900">{user?.firstName}</p>
+                        {
+                          user?.email &&
+                          <p className="text-xs text-gray-500">{user?.email}</p>
+                        }
                       </div>
                     </div>
                   </div>
@@ -177,7 +183,7 @@ const Header = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Cart button */}
             <div
               onClick={openCart}
@@ -206,20 +212,18 @@ const Header = () => {
       {/* Mobile menu with animation */}
       <div
         ref={menuRef}
-        className={`lg:hidden transition-all duration-300 ease-in-out ${
-          isMobileMenuOpen
+        className={`lg:hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen
             ? "max-h-96 opacity-100"
             : "max-h-0 opacity-0 overflow-hidden"
-        }`}
+          }`}
       >
         <div className="pt-2 pb-3 space-y-1 px-4 bg-white shadow-md">
           {menuItems.map((item) => (
             <Link
               key={item.name}
               to={item.path}
-              className={`block pl-3 pr-4 py-2 text-base font-medium ${
-                item.active ? "text-gray-900" : "text-gray-500"
-              } hover:bg-gray-50 hover:text-mainclr rounded-md transition-colors duration-200`}
+              className={`block pl-3 pr-4 py-2 text-base font-medium ${item.active ? "text-gray-900" : "text-gray-500"
+                } hover:bg-gray-50 hover:text-mainclr rounded-md transition-colors duration-200`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {item.name}
