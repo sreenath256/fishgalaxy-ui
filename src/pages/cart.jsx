@@ -74,11 +74,11 @@ const CartPage = () => {
 
   return (
     <div className="w-[95%] md:w-11/12 mx-auto py-8 ">
-      <h1 className="text-2xl font-semibold mb-8">Your Shopping Cart</h1>
+      <h1 className="text-xl md:text-2xl font-semibold mb-8">Your Shopping Cart</h1>
       
       {products.length === 0 ? (
         <div className="text-center py-12">
-          <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
+          <h2 className="md:text-2xl font-semibold mb-4">Your cart is empty</h2>
           <Link 
             to="/shop" 
             className="inline-block bg-mainclr text-white px-6 py-3 rounded-md hover:bg-mainhvr transition-colors"

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { IoIosArrowRoundBack, IoIosArrowRoundForward } from "react-icons/io";
 import ban1 from '../assets/images/fishban1 (1).jpg';
 import ban2 from '../assets/images/fishban2 (1).jpg';
+import { Link } from 'react-router-dom';
 // Slide data array
 const bannerData = [
   {
@@ -10,15 +11,15 @@ const bannerData = [
     title: "Premium Aquarium Essentials",
     description: "Everything you need for a thriving underwater ecosystem",
     buttonText: "Shop Now",
-    buttonLink: "/aquarium-supplies",
+    buttonLink: "/shop",
     image: ban1
   },
   {
     id: 2,
     title: "Tropical Fish Specials",
     description: "New arrivals of exotic species - limited quantities available!",
-    buttonText: "View Collection",
-    buttonLink: "/tropical-fish",
+    buttonText: "Explore more",
+    buttonLink: "/shop",
     image: ban2
   }
 ];
@@ -88,9 +89,9 @@ const Banner = () => {
                 <p className="text-lg md:text-xl mb-6">
                   {bannerData[currentSlide].description}
                 </p>
-                <button className="bg-white text-mainclr px-6 py-3 rounded-md font-medium hover:bg-indigo-100 transition-colors duration-300">
+                <Link to={bannerData[currentSlide].buttonLink} className="bg-white text-mainclr px-6 py-3 rounded-md font-medium hover:bg-indigo-100 transition-colors duration-300">
                   {bannerData[currentSlide].buttonText}
-                </button>
+                </Link>
               </motion.div>
             </div>
           </motion.div>

@@ -18,7 +18,7 @@ const NewArrivals = () => {
   return (
     <div className="py-12 bg-gray-50 relative">
       <div className='flex justify-between items-center w-[98%] md:w-11/12 mx-auto mb-8'>
-        <h2 className="text-3xl font-medium text-mainclr">New Arrivals</h2>
+        <h2 className="text-2xl lg:text-3xl font-medium text-mainclr">New Arrivals</h2>
         <Link to={'/shop'} className='capitalize flex items-center gap-2'>
           <p>view all</p> 
           <IoIosArrowRoundForward className='text-2xl'/>

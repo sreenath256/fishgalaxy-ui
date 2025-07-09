@@ -119,7 +119,7 @@ const Shop = () => {
             <div className=" flex flex-col md:flex-row gap-6">
                 {/* Desktop Sidebar - 1/4 width */}
                <div className="hidden md:block w-1/4 bg-white p-4 rounded-lg shadow-sm md:sticky top-[100px] h-[calc(100vh-32px)] overflow-y-auto">
-                    <h2 className="text-xl font-bold mb-4 text-gray-800">Categories</h2>
+                    <h2 className="text-xl font-medium mb-4 text-gray-800">Categories</h2>
                     <ul className="space-y-2">
                         {categories.map(category => (
                             <li key={category}>

@@ -14,7 +14,7 @@ const CategoriesCarousel = () => {
 
   return (
     <div className="py-12 bg-gray-50 relative">
-      <h2 className="text-3xl font-medium text-center mb-8 text-mainclr">Categories</h2>
+      <h2 className="text-2xl lg:text-3xl font-medium text-center mb-8 text-mainclr">Categories</h2>
       
       {/* Custom Navigation Buttons */}
       <div className="hidden absolute top-[40%] md:top-1/2 left-0 right-0 z-10 md:flex justify-between px-2">

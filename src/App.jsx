@@ -43,30 +43,11 @@ const AllCategory = lazy(() => import("./pages/admin/allCategories"));
 
 // Common layout with header and footer
 const CommonLayout = () => {
-  const location = useLocation();
-  const [scrollHistory, setScrollHistory] = useState({});
-
+ // scroll top retoration
+    const location = useLocation();
   useEffect(() => {
-    if (scrollHistory[location.key]) {
-      window.scrollTo(0, scrollHistory[location.key]);
-    } else {
-      window.scrollTo(0, 0);
-    }
-
-    const saveScrollPosition = () => {
-      setScrollHistory((prev) => ({
-        ...prev,
-        [location.key]: window.scrollY,
-      }));
-    };
-
-    window.addEventListener("beforeunload", saveScrollPosition);
-
-    return () => {
-      saveScrollPosition();
-      window.removeEventListener("beforeunload", saveScrollPosition);
-    };
-  }, [location.key]);
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -80,6 +61,12 @@ const CommonLayout = () => {
 };
 
 const AdminLayout = () => {
+  // scroll top retoration
+    const location = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <div className="min-h-screen bg-gray-50 flex overflow-hidden">
       {/* Sidebar - fixed width */}
@@ -96,6 +83,11 @@ const AdminLayout = () => {
 
 // Retailer layout (could have different header/footer)
 const RetailerLayout = () => {
+  // scroll top retoration
+    const location = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -131,6 +123,7 @@ const ProtectedRoute = ({ userType, allowedRoles, children }) => {
 function App() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [showContent, setShowContent] = useState(false);
+  
 
   useEffect(() => {
     const timer = setTimeout(() => {
