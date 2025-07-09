@@ -23,6 +23,7 @@ const Welcome = lazy(() => import("./pages/welcome"));
 const NotFound = lazy(() => import("./pages/notfound"));
 
 
+const LoginSignup = lazy(() => import("./pages/loginSignup"));
 const Home = lazy(() => import("./pages/home"));
 const About = lazy(() => import("./pages/about"));
 const Shop = lazy(() => import("./pages/shop"));
@@ -148,6 +149,7 @@ function App() {
             <Routes>
               {/* User specific routes */}
               <Route element={<CommonLayout />}>
+                <Route path="/login" element={<LoginSignup />} />
                 <Route path="/welcome" element={<Welcome />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
