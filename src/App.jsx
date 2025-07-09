@@ -17,6 +17,9 @@ import {
   UserFooter,
 } from "./components";
 import Preloader from "./components/Preloader";
+import { Toaster } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserDataFirst } from "./redux/actions/userActions";
 
 //  page components
 const Welcome = lazy(() => import("./pages/welcome"));
@@ -41,28 +44,30 @@ const AllProducts = lazy(() => import("./pages/admin/allProducts"));
 const AddProducts = lazy(() => import("./pages/admin/addProducts"));
 const AllCategory = lazy(() => import("./pages/admin/allCategories"));
 
+
+
 // Common layout with header and footer
 const CommonLayout = () => {
- // scroll top retoration
-    const location = useLocation();
+  // scroll top retoration
+  const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col">
-      <UserHeader />
+      {/* <UserHeader /> */}
       <main className="pt-16">
         <Outlet />
       </main>
-      <UserFooter />
+      {/* <UserFooter /> */}
     </div>
   );
 };
 
 const AdminLayout = () => {
   // scroll top retoration
-    const location = useLocation();
+  const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -84,7 +89,7 @@ const AdminLayout = () => {
 // Retailer layout (could have different header/footer)
 const RetailerLayout = () => {
   // scroll top retoration
-    const location = useLocation();
+  const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -101,29 +106,29 @@ const RetailerLayout = () => {
 
 
 
-// Protected route component
-const ProtectedRoute = ({ userType, allowedRoles, children }) => {
-  const location = useLocation();
 
-  // In a real app, you would check the user's role from auth context
-  const currentUserRole = "retailer"; // user,retailer,admin
-
-  if (!allowedRoles.includes(currentUserRole)) {
-    // Redirect them to the appropriate page based on their role
-    let redirectPath = "/welcome";
-    if (currentUserRole === "admin") redirectPath = "/dashboard";
-    if (currentUserRole === "retailer") redirectPath = "/";
-
-    return <Navigate to={redirectPath} state={{ from: location }} replace />;
-  }
-
-  return children ? children : <Outlet />;
-};
 
 function App() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [showContent, setShowContent] = useState(false);
-  
+
+  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (!user) {
+      dispatch(getUserDataFirst());
+    }
+  }, [dispatch, user]);
+
+
+  // Protected route component
+  const ProtectedRoute = ({ element }) => {
+    const { user } = useSelector((state) => state.user);
+
+    return true ? element : <Navigate to="/login" />;
+  };
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -136,16 +141,51 @@ function App() {
 
   return (
     <>
+      <Toaster position="top-center" />
       <Preloader isComplete={!initialLoading} />
 
       <div
-        className={`transition-opacity duration-500 ${
-          showContent ? "opacity-100" : "opacity-0"
-        }`}
+        className={`transition-opacity duration-500 ${showContent ? "opacity-100" : "opacity-0"
+          }`}
       >
         {showContent && (
           <BrowserRouter>
+            {user ? user.role === "user" && <Header /> : <UserHeader />}
             <Routes>
+              <Route
+                path="/"
+                element={
+                  true ? (
+                    user?.role === "admin" || user?.role === "superAdmin" ? (
+                      <Navigate to="/admin/" />
+                    ) : (
+                      <Home />
+                    )
+                  ) : (
+                    <Welcome />
+                  )
+                }
+              />
+
+              <Route
+                path="/"
+                element={<ProtectedRoute element={<RetailerLayout />} />}
+              >
+                <Route path="/" element={<Home />} />
+
+                <Route path="shop" element={<Shop />} />
+                <Route path="about" element={<About />} />
+                <Route path="cart" element={<Cart />} />
+                <Route path="checkout" element={<Checkout />} />
+                <Route path="success" element={<Success />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="my-order" element={<Myorders />} />
+                <Route path="shop/:id" element={<ProductDetails />} />
+              </Route>
+
+
+
+
               {/* User specific routes */}
               <Route element={<CommonLayout />}>
                 <Route path="/welcome" element={<Welcome />} />
@@ -153,7 +193,7 @@ function App() {
               </Route>
 
               {/* Retailer specific routes */}
-              <Route element={<ProtectedRoute allowedRoles={["retailer"]} />}>
+              {/* <Route element={<ProtectedRoute allowedRoles={["retailer"]} />}>
                 <Route element={<RetailerLayout />}>
                   <Route path="/" element={<Home />} />
 
@@ -166,7 +206,7 @@ function App() {
                   <Route path="/my-order" element={<Myorders />} />
                   <Route path="/shop/:id" element={<ProductDetails />} />
                 </Route>
-              </Route>
+              </Route> */}
 
               {/* Admin specific routes */}
               <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
@@ -180,6 +220,8 @@ function App() {
                 </Route>
               </Route>
             </Routes>
+              {user ? user.role === "user" && <UserFooter /> : <UserFooter />}
+
           </BrowserRouter>
         )}
       </div>
