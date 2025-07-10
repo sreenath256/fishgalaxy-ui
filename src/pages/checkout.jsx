@@ -1,155 +1,139 @@
-import React, { useState } from 'react';
-import { FiTruck } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
-import { pr1 } from '../assets';
+import React, { useState } from "react";
+import { FiTrash2, FiTruck } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
+import { pr1 } from "../assets";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
+  const [products, setProducts] = useState([
+    {
+      image: pr1,
+      price: 100,
+      name: "Product 1",
+      quantity: 1,
+      id: 1,
+    },
+    {
+      image: pr1,
+      price: 100,
+      name: "Product 2",
+      quantity: 1,
+      id: 2,
+    },
+    {
+      image: pr1,
+      price: 100,
+      name: "Product 3",
+      quantity: 1,
+      id: 3,
+    },
+    {
+      image: pr1,
+      price: 100,
+      name: "Product 4",
+      quantity: 1,
+      id: 4,
+    },
+  ]);
+
+  
+
   // Sample cart items
   const cartItems = [
-    { id: 1, name: 'Premium Fish Food', price: 24.99, quantity: 2, image: pr1 },
-    { id: 2, name: 'Aquarium Filter', price: 39.99, quantity: 1, image: pr1 },
+    { id: 1, name: "Premium Fish Food", price: 24.99, quantity: 2, image: pr1 },
+    { id: 2, name: "Aquarium Filter", price: 39.99, quantity: 1, image: pr1 },
   ];
 
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shippingCost = 5.99;
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const shippingCost = 0;
   const tax = subtotal * 0.08;
   const total = subtotal + shippingCost + tax;
 
   const handlePlaceOrder = (e) => {
     e.preventDefault();
     setIsPlacingOrder(true);
-    
+
     // Simulate processing delay
     setTimeout(() => {
-      navigate('/success');
+      navigate("/success");
     }, 2000);
   };
 
   return (
     <div className="w-[95%] md:w-11/12 mx-auto py-8">
       <h1 className="text-2xl font-semibold mb-5 md:mb-8">Checkout</h1>
-      
+
+      <Link to="/cart" className="text-mainclr hover:text-mainhvr text-sm">
+        ← Back to cart
+      </Link>
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Column - Shipping Form */}
         <div className="lg:w-2/3">
-          <form onSubmit={handlePlaceOrder} className="bg-white rounded-lg border shadow-md p-6">
-            <h2 className="text-xl font-bold mb-6 flex items-center">
-              <FiTruck className="mr-2" /> Shipping Information
-            </h2>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">First Name*</label>
-                  <input 
-                    type="text" 
-                    required 
-                    className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr" 
-                  />
+          <div className="pt-5">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden w-full">
+              {/* Table Header */}
+              <div className="hidden md:grid grid-cols-12 bg-gray-100 p-4 border-b">
+                <div className="col-span-5 font-medium">Product</div>
+                <div className="col-span-2 font-medium text-center">Price</div>
+                <div className="col-span-3 font-medium text-center">
+                  Quantity
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Last Name*</label>
-                  <input 
-                    type="text" 
-                    required 
-                    className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr" 
-                  />
-                </div>
+                <div className="col-span-2 font-medium text-right">Total</div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Address*</label>
-                <input 
-                  type="text" 
-                  required 
-                  className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr" 
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Address 2 (Optional)</label>
-                <input 
-                  type="text" 
-                  className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr" 
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">City*</label>
-                  <input 
-                    type="text" 
-                    required 
-                    className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">State*</label>
-                  <select 
-                    required 
-                    className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr"
-                  >
-                    <option value="">Select</option>
-                    <option>Calicut</option>
-                    <option>Malappuram</option>
-                    <option>Kollam</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">ZIP/Postal Code*</label>
-                  <input 
-                    type="text" 
-                    required 
-                    className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr" 
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Country*</label>
-                <select 
-                  required 
-                  className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr"
+              {/* Cart Items */}
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="p-4 border-b last:border-b-0 flex flex-col md:grid md:grid-cols-12 gap-4"
                 >
-                  <option value="">Select</option>
-                  <option selected>India</option>
-                </select>
-              </div>
+                  {/* Product Info */}
+                  <div className="flex items-center col-span-5">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-20 h-20 object-cover rounded mr-4"
+                    />
+                    <div>
+                      <h3 className="font-medium">{product.name}</h3>
+                     
+                    </div>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Email*</label>
-                <input 
-                  type="email" 
-                  required 
-                  className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr" 
-                />
-              </div>
+                  {/* Price */}
+                  <div className="flex items-center col-span-2 justify-center">
+                    <span className="md:hidden mr-2 font-medium">Price:</span>
+                    <span>₹{product.price.toFixed(2)}</span>
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Phone Number*</label>
-                <input 
-                  type="tel" 
-                  required 
-                  className="w-full border rounded-md px-4 py-2 focus:ring-mainclr focus:border-mainclr" 
-                />
-              </div>
+                  {/* Quantity Controls */}
+                  <div className="flex items-center col-span-3 justify-center">
+                    <span className="md:hidden mr-2 font-medium">Qty:</span>
+
+                    <span className="px-4 py-1">
+                      {product.quantity}
+                    </span>
+                  </div>
+
+                  {/* Total */}
+                  <div className="flex items-center col-span-2 justify-end">
+                    <span className="md:hidden mr-2 font-medium">Total:</span>
+                    <span className="font-medium">
+                      ₹{(product.price * product.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className="mt-8">
-              <button 
-                type="submit"
-                disabled={isPlacingOrder}
-                className={`w-full bg-mainclr text-white py-3 rounded-md hover:bg-mainhvr transition-colors font-medium ${
-                  isPlacingOrder ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                {isPlacingOrder ? 'Processing...' : 'Place Order'}
-              </button>
-            </div>
-          </form>
+      
+            
+          </div>
         </div>
 
         {/* Right Column - Order Summary */}
@@ -158,15 +142,7 @@ const Checkout = () => {
             <h2 className="text-xl font-bold mb-4">Order Summary</h2>
 
             <div className="space-y-4 mb-6">
-              {cartItems.map(item => (
-                <div key={item.id} className="flex justify-between">
-                  <div className="flex items-center">
-                    <img src={item.image} alt={item.name} className="w-10 h-10 object-cover rounded mr-2" />
-                    <span>{item.name} × {item.quantity}</span>
-                  </div>
-                  <span>₹{(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              ))}
+             
 
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between">
@@ -187,10 +163,7 @@ const Checkout = () => {
                 </div>
               </div>
             </div>
-
-            <Link to="/cart" className="text-mainclr hover:text-mainhvr text-sm">
-              ← Back to cart
-            </Link>
+              <button className="bg-mainclr text-white w-full py-2 rounded-md capitalize">place order</button>
           </div>
         </div>
       </div>

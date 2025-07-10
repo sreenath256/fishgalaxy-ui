@@ -127,7 +127,7 @@ function App() {
   const ProtectedRoute = ({ element }) => {
     const { user } = useSelector((state) => state.user);
 
-    return user ? element : <Navigate to="/login" />;
+    return true ? element : <Navigate to="/login" />;
   };
 
 
