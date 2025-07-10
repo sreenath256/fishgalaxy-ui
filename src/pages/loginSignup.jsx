@@ -12,6 +12,7 @@ import 'react-phone-input-2/lib/style.css'; // You can also try 'bootstrap.css' 
 import { commonRequest } from "../Common/api";
 import { appJson } from "../Common/configurations";
 import toast from "react-hot-toast";
+import SignupForm from "../components/auth/Signup";
 
 
 const LoginSignup = () => {
@@ -132,11 +133,7 @@ const LoginForm = ({ setActiveTab, setMobile }) => {
 
     // dispatch(loginUser(values.mobile));
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Here you would typically send the OTP
-    setActiveTab("otp");
-  };
+
 
   return (
     <>
@@ -219,188 +216,7 @@ const LoginForm = ({ setActiveTab, setMobile }) => {
   );
 };
 
-const SignupForm = ({ showPassword, setShowPassword, setMobile }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    shopName: "",
-    email: "",
-    mobile: "",
-    pincode: "",
-    address: "",
-    password: "",
-  });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle signup logic here
-    console.log(formData);
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <h2 className="text-xl md:text-2xl text-center font-medium text-gray-800 mb-6">
-        Create your account
-      </h2>
-
-      <div className="mb-4">
-        <label
-          htmlFor="name"
-          className="block text-gray-700 text-sm font-medium mb-2"
-        >
-          Full Name
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr focus:border-transparent transition"
-          placeholder="Enter your full name"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="shopName"
-          className="block text-gray-700 text-sm font-medium mb-2"
-        >
-          Shop Name
-        </label>
-        <input
-          type="text"
-          id="shopName"
-          name="shopName"
-          value={formData.shopName}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr focus:border-transparent transition"
-          placeholder="Enter your shop name"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="email"
-          className="block text-gray-700 text-sm font-medium mb-2"
-        >
-          Email
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr focus:border-transparent transition"
-          placeholder="Enter your email"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="mobile"
-          className="block text-gray-700 text-sm font-medium mb-2"
-        >
-          Mobile Number
-        </label>
-        <input
-          type="number"
-          id="mobile"
-          name="mobile"
-          inputMode="numeric"
-          value={formData.mobile}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr focus:border-transparent transition"
-          placeholder="Enter your mobile number"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="pincode"
-          className="block text-gray-700 text-sm font-medium mb-2"
-        >
-          Pincode
-        </label>
-        <input
-          type="number"
-          id="pincode"
-          name="pincode"
-          inputMode="numeric"
-          value={formData.pincode}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr focus:border-transparent transition"
-          placeholder="Enter your pincode"
-          required
-        />
-      </div>
-
-      <div className="mb-4">
-        <label
-          htmlFor="address"
-          className="block text-gray-700 text-sm font-medium mb-2"
-        >
-          Address
-        </label>
-        <textarea
-          id="address"
-          name="address"
-          value={formData.address}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr focus:border-transparent transition"
-          placeholder="Enter your address"
-          rows="3"
-          required
-        />
-      </div>
-
-      <div className="mb-6 relative">
-        <label
-          htmlFor="password"
-          className="block text-gray-700 text-sm font-medium mb-2"
-        >
-          Password
-        </label>
-        <input
-          type={showPassword ? "text" : "password"}
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr focus:border-transparent transition pr-10"
-          placeholder="Enter your password"
-          required
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-10 text-gray-500 hover:text-gray-700"
-        >
-          {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-        </button>
-      </div>
-
-      <button
-        type="submit"
-        className="w-full bg-mainclr text-white py-2 px-4 rounded-md hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-mainclr focus:ring-offset-2 transition"
-      >
-        Create Account
-      </button>
-    </form>
-  );
-};
 
 const OTPVerification = ({ setActiveTab, mobile }) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
