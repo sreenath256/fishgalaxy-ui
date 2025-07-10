@@ -32,12 +32,13 @@ const header = () => {
           </div>
 
           {/* Login button and mobile menu button */}
-        
-            <button className="flex gap-2 items-center w-fit px-2 md:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr">
-              <p className="capitalize">Login</p>
-              <IoLogInOutline className="text-xl"/>
-            </button>
-      
+
+          <button className="flex gap-2 items-center w-fit px-2 md:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr">
+            <Link to='/login' className="capitalize flex gap-3">Login
+              <IoLogInOutline className="text-xl" />
+            </Link>
+          </button>
+
         </div>
       </div>
     </header>
