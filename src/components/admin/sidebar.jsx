@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FiChevronDown, FiChevronRight, FiMenu, FiX } from "react-icons/fi";
 import { BiSolidBarChartAlt2 } from "react-icons/bi";
 import { FaUsers, FaBoxOpen } from "react-icons/fa";
 import { HiOutlineShoppingBag } from "react-icons/hi2";
 import { RiAdminFill } from "react-icons/ri";
 import { IoLogOutOutline } from "react-icons/io5";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../redux/actions/userActions";
 
 const Sidebar = () => {
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+
+  const { user } = useSelector((state) => state.user);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleResize = () => {
@@ -26,17 +33,17 @@ const Sidebar = () => {
   }, []);
 
   const menuItems = [
-    { path: "/dashboard", icon: <BiSolidBarChartAlt2 />, name: "Dashboard" },
-    { path: "/retailers", icon: <FaUsers />, name: "Retailers" },
-    { path: "/orders", icon: <FaBoxOpen />, name: "Orders" },
+    { path: "/admin/", icon: <BiSolidBarChartAlt2 />, name: "Dashboard" },
+    { path: "/admin/retailers", icon: <FaUsers />, name: "Retailers" },
+    { path: "/admin/orders", icon: <FaBoxOpen />, name: "Orders" },
     {
       name: "Products",
       icon: <HiOutlineShoppingBag />,
       id: "products",
       submenu: [
-        { path: "/products/all", name: "All Products" },
-        { path: "/products/add", name: "Add Product" },
-        { path: "/products/categories", name: "All Categories" },
+        { path: "/admin/products", name: "All Products" },
+        { path: "/admin/products/add", name: "Add Product" },
+        { path: "/admin/products/categories", name: "All Categories" },
       ],
     },
   ];
@@ -63,6 +70,12 @@ const Sidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
   };
 
+  const handleLogout = () => {
+    setIsMobileSidebarOpen(false);
+    dispatch(logout());
+    navigate("/");
+  };
+
   return (
     <>
       {/* Mobile Toggle Button */}
@@ -77,13 +90,12 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed md:relative z-40 w-64 h-screen bg-gray-100 text-black flex flex-col transition-transform duration-300 ease-in-out ${
-          isMobile
-            ? isMobileSidebarOpen
-              ? "translate-x-0 "
-              : "-translate-x-full"
-            : "translate-x-0"
-        }`}
+        className={`fixed md:relative z-40 w-64 h-screen bg-gray-100 text-black flex flex-col transition-transform duration-300 ease-in-out ${isMobile
+          ? isMobileSidebarOpen
+            ? "translate-x-0 "
+            : "-translate-x-full"
+          : "translate-x-0"
+          }`}
       >
         {/* Sidebar Header */}
         <div className="p-4 bg-gray-200 text-black text-center">
@@ -102,10 +114,9 @@ const Sidebar = () => {
                       to={item.path}
                       onClick={closeAllMenus}
                       className={({ isActive }) =>
-                        `flex items-center p-3 rounded-lg transition-colors ${
-                          isActive
-                            ? "bg-gray-200 text-black"
-                            : "text-black hover:bg-gray-200"
+                        `flex items-center p-3 rounded-lg transition-colors ${isActive
+                          ? "bg-gray-200 text-black"
+                          : "text-black hover:bg-gray-200"
                         }`
                       }
                     >
@@ -118,11 +129,10 @@ const Sidebar = () => {
                   <li className="px-2">
                     <button
                       onClick={() => toggleSubmenu(item.id)}
-                      className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors ${
-                        openSubmenu === item.id
-                          ? "bg-gray-200 text-black"
-                          : "text-black hover:bg-gray-200"
-                      }`}
+                      className={`flex items-center justify-between w-full p-3 rounded-lg transition-colors ${openSubmenu === item.id
+                        ? "bg-gray-200 text-black"
+                        : "text-black hover:bg-gray-200"
+                        }`}
                     >
                       <div className="flex items-center">
                         <span className="mr-3 text-lg">{item.icon}</span>
@@ -137,9 +147,8 @@ const Sidebar = () => {
 
                     {/* Submenu with smooth transition */}
                     <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        openSubmenu === item.id ? "max-h-96" : "max-h-0"
-                      }`}
+                      className={`overflow-hidden transition-all duration-300 ease-in-out ${openSubmenu === item.id ? "max-h-96" : "max-h-0"
+                        }`}
                     >
                       <ul className="ml-8 mt-2 space-y-2">
                         {item.submenu.map((subItem, subIndex) => (
@@ -148,10 +157,9 @@ const Sidebar = () => {
                               to={subItem.path}
                               onClick={handleSubmenuItemClick}
                               className={({ isActive }) =>
-                                `block p-2 pl-4 rounded-lg transition-colors ${
-                                  isActive
-                                    ? "bg-gray-200 text-black"
-                                    : "text-black hover:bg-gray-200"
+                                `block p-2 pl-4 rounded-lg transition-colors ${isActive
+                                  ? "bg-gray-200 text-black"
+                                  : "text-black hover:bg-gray-200"
                                 }`
                               }
                             >
@@ -176,12 +184,13 @@ const Sidebar = () => {
                 <RiAdminFill />
               </span>
               <div>
-                <p className="font-medium text-sm">Admin User</p>
-                <p className="text-xs">admin@example.com</p>
+                {console.log(user)}
+                <p className="font-medium text-sm">{user?.name}</p>
+                <p className="text-xs">{user?.email}</p>
               </div>
             </div>
             {/* Logout with tooltip */}
-            <div className="relative group">
+            <div className="relative group" onClick={handleLogout}>
               <span className="text-2xl hover:bg-gray-300 p-2 rounded-full grid place-items-center cursor-pointer">
                 <IoLogOutOutline />
               </span>

@@ -5,6 +5,53 @@
 
 
 
+.admin-button-fl {
+  @apply flex items-center gap-2 p-2 rounded-lg;
+}
+
+.admin-status {
+  @apply px-2 py-1 hover:bg-gray-100 hover:rounded-md cursor-pointer;
+}
+
+.admin-label {
+  @apply text-sm mt-2 font-semibold text-gray-700;
+}
+
+.admin-input {
+  @apply w-full bg-white rounded-md mt-2 py-2 px-3 text-sm outline-none border border-gray-200;
+}
+
+.admin-input-no-m {
+  @apply bg-gray-100 rounded-md py-2 px-3 text-sm outline-none border border-gray-200;
+}
+
+.admin-div {
+  @apply bg-white p-5 rounded-lg mb-5;
+}
+
+.admin-table-head {
+  @apply font-semibold p-4 text-left;
+}
+
+.admin-table-row {
+  @apply text-sm p-4;
+}
+
+/* Toggle Switch Styles */
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #2563eb;
+}
+
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #2563eb;
+}
+
+.toggle-checkbox {
+  transition: all 0.3s ease;
+  right: 0;
+}a
+
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;

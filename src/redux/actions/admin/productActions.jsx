@@ -42,3 +42,17 @@ export const updateProduct = createAsyncThunk(
     );
   }
 );
+
+// Function to soft-delete product (set isActive to false)
+export const deleteProduct = createAsyncThunk(
+  "products/deleteProduct",
+  async (id, { rejectWithValue }) => {
+    return commonReduxRequest(
+      "delete",
+      `/admin/product/${id}`,
+      { isActive: false }, // The update payload
+      appJson,
+      rejectWithValue
+    );
+  }
+);

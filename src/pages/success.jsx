@@ -1,14 +1,20 @@
 
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaCheck, FaShoppingBag } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 const Success = () => {
+
+  const location = useLocation();
+  const orderData = location.state;
+
+  const navigate = useNavigate()
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
       transition: { duration: 0.5 }
     }
@@ -16,9 +22,9 @@ const Success = () => {
 
   const checkVariants = {
     hidden: { scale: 0 },
-    visible: { 
+    visible: {
       scale: 1,
-      transition: { 
+      transition: {
         type: 'spring',
         stiffness: 500,
         damping: 15,
@@ -29,8 +35,8 @@ const Success = () => {
 
   const textVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
+    visible: {
+      y: 0,
       opacity: 1,
       transition: { delay: 0.6 }
     }
@@ -38,16 +44,28 @@ const Success = () => {
 
   const buttonVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
+    visible: {
+      y: 0,
       opacity: 1,
       transition: { delay: 0.8 }
     },
     hover: { scale: 1.05 }
   };
 
+
+useEffect(() => {
+  if (!orderData) {
+    navigate('/');
+  }
+}, [navigate, orderData]);
+
+if (!orderData) {
+  return null; // or <LoadingSpinner />;
+}
+
+
   return (
-    <motion.div 
+    <motion.div
       className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50"
       variants={containerVariants}
       initial="hidden"
@@ -55,7 +73,7 @@ const Success = () => {
     >
       <div className="max-w-md w-full bg-white rounded-xl shadow-md p-8 text-center">
         {/* Animated Checkmark */}
-        <motion.div 
+        <motion.div
           className="mx-auto flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-6"
           variants={checkVariants}
         >
@@ -63,14 +81,31 @@ const Success = () => {
         </motion.div>
 
         {/* Success Text */}
-        <motion.h1 
+        <motion.h1
           className="text-3xl font-bold text-gray-800 mb-3"
           variants={textVariants}
         >
           Order Successful!
         </motion.h1>
-        
-        <motion.p 
+
+        <motion.p
+          className="text-gray-600 mb-8"
+          variants={textVariants}
+        >
+          Order ID: {orderData.orderId}
+        </motion.p>
+
+        <motion.p
+          className="text-gray-600 mb-8"
+          variants={textVariants}
+        >
+          Order Total: {orderData.totalPrice}
+        </motion.p>
+
+
+
+
+        <motion.p
           className="text-gray-600 mb-8"
           variants={textVariants}
         >
@@ -78,13 +113,18 @@ const Success = () => {
         </motion.p>
 
         {/* Order Details (optional) */}
-        <motion.div 
+        <motion.div
           className="bg-gray-50 rounded-lg p-4 mb-8 text-left"
           variants={textVariants}
         >
           <div className="flex justify-between mb-2">
             <span className="text-gray-600">Order Number:</span>
-            <span className="font-medium">#12345</span>
+            <span className="font-medium"> {orderData.orderId}</span>
+          </div>
+
+          <div className="flex justify-between mb-2">
+            <span className="text-gray-600">Totoal Price:</span>
+            <span className="font-medium"> {orderData.totalPrice}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600">Estimated Delivery:</span>
@@ -94,7 +134,7 @@ const Success = () => {
 
         {/* Back to Shopping Button */}
         <motion.div variants={buttonVariants}>
-          <Link 
+          <Link
             to="/"
             className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
             whileHover="hover"
@@ -105,7 +145,7 @@ const Success = () => {
         </motion.div>
 
         {/* Additional Help Text */}
-        <motion.p 
+        <motion.p
           className="text-sm text-gray-500 mt-6"
           variants={textVariants}
         >

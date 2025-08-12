@@ -5,7 +5,6 @@ import {
   Route,
   Navigate,
   Outlet,
-  Link,
   useLocation,
 } from "react-router-dom";
 import { lazy, Suspense, useState, useEffect } from "react";
@@ -14,18 +13,16 @@ import {
   Footer,
   AdminSidebar,
   UserHeader,
-  UserFooter,
 } from "./components";
 import Preloader from "./components/Preloader";
 import { Toaster } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserDataFirst } from "./redux/actions/userActions";
+import "react-day-picker/style.css";
 
-//  page components
+// Page components
 const Welcome = lazy(() => import("./pages/welcome"));
 const NotFound = lazy(() => import("./pages/notfound"));
-
-
 const LoginSignup = lazy(() => import("./pages/loginSignup"));
 const Home = lazy(() => import("./pages/home"));
 const About = lazy(() => import("./pages/about"));
@@ -37,19 +34,19 @@ const Profile = lazy(() => import("./pages/profile"));
 const Myorders = lazy(() => import("./pages/myOrders"));
 const ProductDetails = lazy(() => import("./pages/productDetails"));
 
-// admin
+// Admin pages
 const Dashboard = lazy(() => import("./pages/admin/dashboard"));
 const Orders = lazy(() => import("./pages/admin/orders"));
 const Retailers = lazy(() => import("./pages/admin/retailer"));
 const AllProducts = lazy(() => import("./pages/admin/allProducts"));
+const EditProduct = lazy(() => import("./pages/admin/EditProduct"));
 const AddProducts = lazy(() => import("./pages/admin/addProducts"));
 const AllCategory = lazy(() => import("./pages/admin/allCategories"));
+const AddCategory = lazy(() => import("./pages/admin/createCategories"));
+const EditCategory = lazy(() => import("./pages/admin/EditCategory"));
 
-
-
-// Common layout with header and footer
+// Layouts
 const CommonLayout = () => {
-  // scroll top retoration
   const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -57,17 +54,14 @@ const CommonLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* <UserHeader /> */}
       <main className="pt-16">
         <Outlet />
       </main>
-      {/* <UserFooter /> */}
     </div>
   );
 };
 
 const AdminLayout = () => {
-  // scroll top retoration
   const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -75,11 +69,9 @@ const AdminLayout = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex overflow-hidden">
-      {/* Sidebar - fixed width */}
       <div className="md:w-64 fixed h-full bg-gray-800 text-white">
         <AdminSidebar />
       </div>
-      {/* Main content with outlet */}
       <main className="flex-1 flex flex-col pt-16 md:pt-5 md:ml-64 p-5">
         <Outlet />
       </main>
@@ -87,17 +79,15 @@ const AdminLayout = () => {
   );
 };
 
-// Retailer layout (could have different header/footer)
 const RetailerLayout = () => {
-  // scroll top retoration
   const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex flex-col">
       <Header />
-      <main className="pt-16">
+      <main className="pt-16 min-h-screen">
         <Outlet />
       </main>
       <Footer />
@@ -105,9 +95,15 @@ const RetailerLayout = () => {
   );
 };
 
-
-
-
+// Role-based route protection
+const ProtectedRoute = ({ element, allowedRoles }) => {
+  const { user } = useSelector((state) => state.user);
+  if (!user) return <Navigate to="/login" />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" />;
+  }
+  return element;
+};
 
 function App() {
   const [initialLoading, setInitialLoading] = useState(true);
@@ -122,21 +118,11 @@ function App() {
     }
   }, [dispatch, user]);
 
-
-  // Protected route component
-  const ProtectedRoute = ({ element }) => {
-    const { user } = useSelector((state) => state.user);
-
-    return true ? element : <Navigate to="/login" />;
-  };
-
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setInitialLoading(false);
       setTimeout(() => setShowContent(true), 300);
     }, 2000);
-
     return () => clearTimeout(timer);
   }, []);
 
@@ -146,19 +132,21 @@ function App() {
       <Preloader isComplete={!initialLoading} />
 
       <div
-        className={`transition-opacity duration-500 ${showContent ? "opacity-100" : "opacity-0"
-          }`}
+        className={`transition-opacity duration-500 ${
+          showContent ? "opacity-100" : "opacity-0"
+        }`}
       >
         {showContent && (
           <BrowserRouter>
             {user ? user.role === "user" && <Header /> : <UserHeader />}
             <Routes>
+              {/* Landing route */}
               <Route
                 path="/"
                 element={
                   user ? (
-                    user?.role === "admin" || user?.role === "superAdmin" ? (
-                      <Navigate to="/admin/" />
+                    user.role === "admin" || user.role === "superAdmin" ? (
+                      <Navigate to="/admin" />
                     ) : (
                       <Home />
                     )
@@ -168,62 +156,64 @@ function App() {
                 }
               />
 
+              {/* User routes */}
               <Route
-                path="/"
-                element={<ProtectedRoute element={<RetailerLayout />} />}
+                element={
+                  <ProtectedRoute
+                    allowedRoles={["user", "retailer"]}
+                    element={<RetailerLayout />}
+                  />
+                }
               >
-                <Route path="/" element={<Home />} />
-
                 <Route path="shop" element={<Shop />} />
                 <Route path="about" element={<About />} />
                 <Route path="cart" element={<Cart />} />
                 <Route path="checkout" element={<Checkout />} />
-                <Route path="success" element={<Success />} />
+                <Route path="order-confirmation" element={<Success />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="my-order" element={<Myorders />} />
                 <Route path="shop/:id" element={<ProductDetails />} />
               </Route>
 
-
-
-
-              {/* User specific routes */}
+              {/* Auth & public */}
               <Route element={<CommonLayout />}>
                 <Route path="/login" element={<LoginSignup />} />
                 <Route path="/welcome" element={<Welcome />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
 
-              {/* Retailer specific routes */}
-              {/* <Route element={<ProtectedRoute allowedRoles={["retailer"]} />}>
-                <Route element={<RetailerLayout />}>
-                  <Route path="/" element={<Home />} />
-
-                  <Route path="/shop" element={<Shop />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/success" element={<Success />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/my-order" element={<Myorders />} />
-                  <Route path="/shop/:id" element={<ProductDetails />} />
-                </Route>
-              </Route> */}
-
-              {/* Admin specific routes */}
-              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-                <Route element={<AdminLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/retailers" element={<Retailers />} />
-                  <Route path="/products/all" element={<AllProducts />} />
-                  <Route path="/products/add" element={<AddProducts />} />
-                  <Route path="/products/categories" element={<AllCategory />} />
-                </Route>
+              {/* Admin routes */}
+              <Route
+                element={
+                  <ProtectedRoute
+                    allowedRoles={["admin", "superAdmin"]}
+                    element={<AdminLayout />}
+                  />
+                }
+              >
+                <Route path="/admin" element={<Dashboard />} />
+                <Route path="/admin/orders" element={<Orders />} />
+                <Route path="/admin/retailers" element={<Retailers />} />
+                <Route path="/admin/products" element={<AllProducts />} />
+                <Route
+                  path="/admin/products/edit/:id"
+                  element={<EditProduct />}
+                />
+                <Route path="/admin/products/add" element={<AddProducts />} />
+                <Route
+                  path="/admin/products/categories"
+                  element={<AllCategory />}
+                />
+                <Route
+                  path="/admin/products/categories/add"
+                  element={<AddCategory />}
+                />
+                <Route
+                  path="/admin/products/categories/edit/:id"
+                  element={<EditCategory />}
+                />
               </Route>
             </Routes>
-              {user ? user.role === "user" && <UserFooter /> : <UserFooter />}
-
           </BrowserRouter>
         )}
       </div>

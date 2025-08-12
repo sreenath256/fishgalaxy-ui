@@ -2,6 +2,14 @@ import date from "date-and-time";
 import { formatDistanceToNow } from "date-fns";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 
+
+// Function to get the current date in "MMM DD, YYYY" format
+export const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
+};
+
+
 export const getStatusDate = (status, statusHistory) => {
   const filteredStatus = statusHistory.find((item) => item.status === status);
 

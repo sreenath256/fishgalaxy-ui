@@ -10,6 +10,7 @@ import { appJson } from "../../Common/configurations";
 import PhoneInput from "react-phone-input-2";
 import { FaArrowLeft } from "react-icons/fa";
 import { getUserDataFirst } from "../../redux/actions/userActions";
+import { set } from "date-fns/set";
 
 const SignupForm = ({ showPassword, setShowPassword, setActiveTab }) => {
     const { user, loading, error } = useSelector((state) => state.user);
@@ -19,6 +20,8 @@ const SignupForm = ({ showPassword, setShowPassword, setActiveTab }) => {
     const [formData, setFormData] = useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+    const [successSignUp, setSuccessSignUp] = useState(false);
 
     useEffect(() => {
         if (user) navigate("/");
@@ -44,7 +47,9 @@ const SignupForm = ({ showPassword, setShowPassword, setActiveTab }) => {
         pincode: Yup.string()
             .required("Pincode is required")
             .matches(/^\d{6}$/, "Enter a valid 6-digit pincode"),
-        address: Yup.string().required("Address is required"),
+        address: Yup.string()
+            .required("Address is required")
+            .min(10, "Please provide a valid address"),
     });
 
     const handleRegister = async (values) => {
@@ -108,8 +113,10 @@ const SignupForm = ({ showPassword, setShowPassword, setActiveTab }) => {
             if (registrationRes.success) {
                 toast.success("Registration successful!");
                 // You might want to login the user automatically here
+                setShowOTPForm(false)
+                setSuccessSignUp(true);
                 dispatch(getUserDataFirst())
-                navigate("/");
+                // navigate("/");
             } else {
                 throw new Error(registrationRes.response?.data?.error || "Registration failed");
             }
@@ -133,127 +140,147 @@ const SignupForm = ({ showPassword, setShowPassword, setActiveTab }) => {
     }
 
     return (
-        <Formik
-            initialValues={initialValues}
-            onSubmit={handleRegister}
-            validationSchema={validationSchema}
-        >
-            {() => (
-                <Form className="space-y-4">
-                    <h2 className="text-xl md:text-2xl text-center font-medium text-gray-800 mb-6">
-                        Create your account
-                    </h2>
-
-                    {/* Full Name */}
-                    <div>
-                        <label htmlFor="name" className="block text-gray-700 text-sm font-medium mb-1">
-                            Full Name
-                        </label>
-                        <Field
-                            name="name"
-                            type="text"
-                            placeholder="Enter your full name"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
-                        />
-                        <ErrorMessage name="name" component="span" className="text-sm text-red-500" />
+        <>
+            {
+                successSignUp ? (
+                    <div className="max-w-md mx-auto text-center mt-8">
+                        <h2 className="text-2xl font-semibold text-green-600 mb-4">Registration Successful!</h2>
+                        <p className="text-gray-700 mb-6">Your account has been created successfully. Please contact the Fish Galaxy admin to grant access.</p>
+                        {/* <button
+                            onClick={() => navigate("/login")}
+                            className="bg-mainclr text-white py-2 px-4 rounded-md hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-mainclr transition"
+                        >
+                            Go to Login
+                        </button> */}
                     </div>
+                ) :
+                    (
 
-                    {/* Shop Name */}
-                    <div>
-                        <label htmlFor="shopName" className="block text-gray-700 text-sm font-medium mb-1">
-                            Shop Name
-                        </label>
-                        <Field
-                            name="shopName"
-                            type="text"
-                            placeholder="Enter your shop name"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
-                        />
-                        <ErrorMessage name="shopName" component="span" className="text-sm text-red-500" />
-                    </div>
+                        <Formik
+                            initialValues={initialValues}
+                            onSubmit={handleRegister}
+                            validationSchema={validationSchema}
+                        >
+                            {() => (
+                                <Form className="space-y-4">
+                                    <h2 className="text-xl md:text-2xl text-center font-medium text-gray-800 mb-6">
+                                        Create your account
+                                    </h2>
 
-                    {/* Email */}
-                    <div>
-                        <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-1">
-                            Email
-                        </label>
-                        <Field
-                            name="email"
-                            type="email"
-                            placeholder="Enter your email"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
-                        />
-                        <ErrorMessage name="email" component="span" className="text-sm text-red-500" />
-                    </div>
+                                    {/* Full Name */}
+                                    <div>
+                                        <label htmlFor="name" className="block text-gray-700 text-sm font-medium mb-1">
+                                            Full Name
+                                        </label>
+                                        <Field
+                                            name="name"
+                                            type="text"
+                                            placeholder="Enter your full name"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
+                                        />
+                                        <ErrorMessage name="name" component="span" className="text-sm text-red-500" />
+                                    </div>
 
-                    {/* Mobile */}
-                    <div>
-                        <label htmlFor="mobile" className="block text-gray-700 text-sm font-medium mb-1">
-                            Mobile Number
-                        </label>
-                        <Field name="mobile">
-                            {({ field, form }) => (
-                                <PhoneInput
-                                    country={'in'}
-                                    value={field.value}
-                                    onChange={(phone) => form.setFieldValue('mobile', phone)}
-                                    inputClass="!w-full !py-2 !px-4 !rounded-md !border !border-gray-300"
-                                    inputStyle={{ width: '100%' }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            form.submitForm();
-                                        }
-                                    }}
-                                />
+                                    {/* Shop Name */}
+                                    <div>
+                                        <label htmlFor="shopName" className="block text-gray-700 text-sm font-medium mb-1">
+                                            Shop Name
+                                        </label>
+                                        <Field
+                                            name="shopName"
+                                            type="text"
+                                            placeholder="Enter your shop name"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
+                                        />
+                                        <ErrorMessage name="shopName" component="span" className="text-sm text-red-500" />
+                                    </div>
+
+                                    {/* Email */}
+                                    <div>
+                                        <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-1">
+                                            Email
+                                        </label>
+                                        <Field
+                                            name="email"
+                                            type="email"
+                                            placeholder="Enter your email"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
+                                        />
+                                        <ErrorMessage name="email" component="span" className="text-sm text-red-500" />
+                                    </div>
+
+                                    {/* Mobile */}
+                                    <div>
+                                        <label htmlFor="mobile" className="block text-gray-700 text-sm font-medium mb-1">
+                                            Mobile Number
+                                        </label>
+                                        <Field name="mobile">
+                                            {({ field, form }) => (
+                                                <PhoneInput
+                                                    country={'in'}
+                                                    value={field.value}
+                                                    onChange={(mobile) => form.setFieldValue('mobile', mobile)}
+                                                    inputClass="!w-full !py-2 !px-4 !rounded-md !border !border-gray-300"
+                                                    inputStyle={{ width: '100%' }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                            e.preventDefault();
+                                                            form.submitForm();
+                                                        }
+                                                    }}
+                                                />
+                                            )}
+                                        </Field>
+                                        <ErrorMessage name="mobile" component="span" className="text-sm text-red-500" />
+                                    </div>
+
+                                    {/* Pincode */}
+                                    <div>
+                                        <label htmlFor="pincode" className="block text-gray-700 text-sm font-medium mb-1">
+                                            Pincode
+                                        </label>
+                                        <Field
+                                            name="pincode"
+                                            type="text"
+                                            placeholder="Enter your pincode"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
+                                        />
+                                        <ErrorMessage name="pincode" component="span" className="text-sm text-red-500" />
+                                    </div>
+
+                                    {/* Address */}
+                                    <div>
+                                        <label htmlFor="address" className="block text-gray-700 text-sm font-medium mb-1">
+                                            Address
+                                        </label>
+                                        <Field
+                                            name="address"
+                                            as="textarea"
+                                            placeholder="Enter your address"
+                                            rows="3"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
+                                        />
+                                        <ErrorMessage name="address" component="span" className="text-sm text-red-500" />
+                                    </div>
+
+                                    {error && <p className="my-1 text-red-400">{error}</p>}
+
+
+                                    {/* Submit Button */}
+                                    <button
+                                        type="submit"
+                                        disabled={OTPLoading}
+                                        className="w-full bg-mainclr text-white py-2 px-4 rounded-md hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-mainclr focus:ring-offset-2 transition"
+                                    >
+                                        {OTPLoading ? "Sending OTP..." : "Create Account"}
+                                    </button>
+                                </Form>
                             )}
-                        </Field>
-                        <ErrorMessage name="mobile" component="span" className="text-sm text-red-500" />
-                    </div>
+                        </Formik>
+                    )
+            }
+        </>
 
-                    {/* Pincode */}
-                    <div>
-                        <label htmlFor="pincode" className="block text-gray-700 text-sm font-medium mb-1">
-                            Pincode
-                        </label>
-                        <Field
-                            name="pincode"
-                            type="text"
-                            placeholder="Enter your pincode"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
-                        />
-                        <ErrorMessage name="pincode" component="span" className="text-sm text-red-500" />
-                    </div>
-
-                    {/* Address */}
-                    <div>
-                        <label htmlFor="address" className="block text-gray-700 text-sm font-medium mb-1">
-                            Address
-                        </label>
-                        <Field
-                            name="address"
-                            as="textarea"
-                            placeholder="Enter your address"
-                            rows="3"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr"
-                        />
-                        <ErrorMessage name="address" component="span" className="text-sm text-red-500" />
-                    </div>
-
-                    {error && <p className="my-1 text-red-400">{error}</p>}
-
-
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={OTPLoading}
-                        className="w-full bg-mainclr text-white py-2 px-4 rounded-md hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-mainclr focus:ring-offset-2 transition"
-                    >
-                        {OTPLoading ? "Sending OTP..." : "Create Account"}
-                    </button>
-                </Form>
-            )}
-        </Formik>
     );
 };
 
@@ -375,6 +402,11 @@ const OTPVerification = ({ setActiveTab, mobile, handleOTPVerification, loading,
                             placeholder="-"
                             onChange={(e) => handleChange(e, index)}
                             onPaste={handlePaste}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && index === otp.length - 1) {
+                                    handleSubmit(e);
+                                }
+                            }}
                         />
                     ))}
                 </div>

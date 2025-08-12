@@ -1,10 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiPackage, FiTruck, FiCheckCircle, FiClock, FiXCircle, FiEye, FiSearch, FiFilter } from 'react-icons/fi';
 import { MdOutlineLocalShipping, MdOutlinePayment } from 'react-icons/md';
 import { BsBoxSeam } from 'react-icons/bs';
 import { pr1 } from '../assets';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSearchParams } from 'react-router-dom';
+import { getOrders } from '../redux/actions/user/userOrderActions';
+import date from "date-and-time";
+import StatusComponent from '../components/admin/StatusComponent';
+import { ClipLoader } from 'react-spinners';
+import Skeleton from 'react-loading-skeleton';
+import Pagination from '../components/admin/Pagination';
+
 
 const MyOrders = () => {
+
+  const { userOrders, loading, error, totalAvailableOrders } = useSelector(
+    (state) => state.userOrders
+  );
+
+
+  console.log("userOrders", userOrders);
+  const dispatch = useDispatch();
+
+  // Pagination
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [page, setPage] = useState(1);
+  const handleFilter = (type, value) => {
+    const params = new URLSearchParams(window.location.search);
+    if (value === "") {
+      params.delete(type);
+    } else {
+      if (type === "page" && value === 1) {
+        params.delete(type);
+        setPage(1);
+      } else {
+        params.set(type, value);
+        if (type === "page") {
+          setPage(value);
+        }
+      }
+    }
+    setSearchParams(params.toString() ? "?" + params.toString() : "");
+  };
+
+  useEffect(() => {
+    dispatch(getOrders(searchParams));
+    const params = new URLSearchParams(window.location.search);
+    const pageNum = params.get("page");
+    setPage(parseInt(pageNum) || 1);
+  }, [searchParams]);
+
+
   // Sample order data
   const allOrders = [
     {
@@ -182,8 +230,8 @@ const MyOrders = () => {
 
   // Filter and search logic
   const filteredOrders = allOrders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         order.date.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.date.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'All' || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -191,7 +239,6 @@ const MyOrders = () => {
   // Pagination logic
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   // View order details
@@ -216,38 +263,8 @@ const MyOrders = () => {
                 <FiPackage className="text-indigo-600 text-2xl mr-3" />
                 <h1 className="text-xl font-medium text-gray-800">My Orders</h1>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiSearch className="text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search orders..."
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:w-64"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FiFilter className="text-gray-400" />
-                  </div>
-                  <select
-                    className="pl-10 pr-8 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:w-48"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="All">All Statuses</option>
-                    <option value="Processing">Processing</option>
-                    <option value="Shipped">Shipped</option>
-                    <option value="Delivered">Delivered</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
-                </div>
-              </div>
+
+
             </div>
           </div>
 
@@ -262,9 +279,9 @@ const MyOrders = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Items
-                  </th>
+                  </th> */}
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total
                   </th>
@@ -277,137 +294,67 @@ const MyOrders = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentOrders.length > 0 ? (
-                  currentOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-indigo-600">{order.id}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{order.date}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">₹{order.total.toFixed(2)}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className={`flex w-fit items-center ${order.statusClass} text-xs px-2.5 py-0.5 rounded-full font-medium`}>
-                          {order.icon}
-                          <span className="ml-1.5">{order.status}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button 
-                          onClick={() => viewOrderDetails(order)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-4 flex items-center"
-                        >
-                          <FiEye className="mr-1" /> View
-                        </button>
-                       
+                {
+                  loading ? (
+                    <tr >
+                      <td colSpan={5} className="px-6 py-4">
+                        <Skeleton count={10} height={30} />
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
-                      No orders found matching your criteria
-                    </td>
-                  </tr>
-                )}
+                  ) :
+
+                    userOrders.length > 0 ? (
+                      userOrders.map((order) => (
+                        <tr key={order.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-indigo-600">{order._id}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-500"> {date.format(new Date(order.createdAt), "MMM DD YYYY")}</div>
+                          </td>
+                          {/* <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-500">{order.products.length} item{order.products.length !== 1 ? 's' : ''}</div>
+                          </td> */}
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">₹{order.totalPrice.toFixed(2)}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className={`flex w-fit items-center ${order.statusClass} text-xs px-2.5 py-0.5 rounded-full font-medium`}>
+                              <StatusComponent status={order.status} />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={() => viewOrderDetails(order)}
+                              className="text-indigo-600 hover:text-indigo-900 mr-4 flex items-center"
+                            >
+                              <FiEye className="mr-1" /> View
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
+                          No orders found matching your criteria
+                        </td>
+                      </tr>
+                    )}
               </tbody>
             </table>
           </div>
 
           {/* Pagination */}
-          {filteredOrders.length > ordersPerPage && (
-            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-              <div className="flex-1 flex justify-between sm:hidden">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${currentPage === 1 ? 'bg-gray-100 text-gray-400' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className={`ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md ${currentPage === totalPages ? 'bg-gray-100 text-gray-400' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                >
-                  Next
-                </button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex flex-col md:flex-row gap-y-3 sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{indexOfFirstOrder + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(indexOfLastOrder, filteredOrders.length)}</span> of{' '}
-                    <span className="font-medium">{filteredOrders.length}</span> orders
-                  </p>
-                </div>
-                <div>
-                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    <button
-                      onClick={() => setCurrentPage(1)}
-                      disabled={currentPage === 1}
-                      className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 text-sm font-medium ${currentPage === 1 ? 'bg-gray-100 text-gray-400' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                    >
-                      <span className="sr-only">First</span>
-                      <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                        <path fillRule="evenodd" d="M8.707 5.293a1 1 0 010 1.414L5.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                      className={`relative inline-flex items-center px-2 py-2 border border-gray-300 text-sm font-medium ${currentPage === 1 ? 'bg-gray-100 text-gray-400' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                    >
-                      <span className="sr-only">Previous</span>
-                      <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                    
-                    {/* Page numbers */}
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'}`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                    
-                    <button
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className={`relative inline-flex items-center px-2 py-2 border border-gray-300 text-sm font-medium ${currentPage === totalPages ? 'bg-gray-100 text-gray-400' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                    >
-                      <span className="sr-only">Next</span>
-                      <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => setCurrentPage(totalPages)}
-                      disabled={currentPage === totalPages}
-                      className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 text-sm font-medium ${currentPage === totalPages ? 'bg-gray-100 text-gray-400' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
-                    >
-                      <span className="sr-only">Last</span>
-                      <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                        <path fillRule="evenodd" d="M11.293 14.707a1 1 0 010-1.414L14.586 10l-3.293-3.293a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </nav>
-                </div>
-              </div>
-            </div>
-          )}
+
+          <div className="py-5">
+            <Pagination
+              handleClick={handleFilter}
+              number={10}
+              page={page}
+              totalNumber={totalAvailableOrders}
+            />
+          </div>
+
         </div>
       </div>
 
@@ -418,16 +365,16 @@ const MyOrders = () => {
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
               <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={closeModal}></div>
             </div>
-            
+
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            
+
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle w-[95%] md:w-[80%] xl:w-[60%]">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg leading-6 font-medium text-gray-900">
-                        Order Details - {selectedOrder.id}
+                        Order Details - {selectedOrder._id}
                       </h3>
                       <button
                         type="button"
@@ -440,7 +387,7 @@ const MyOrders = () => {
                         </svg>
                       </button>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Order Summary */}
                       <div>
@@ -450,25 +397,25 @@ const MyOrders = () => {
                         <div className="space-y-4">
                           <div className="flex justify-between">
                             <span className="text-gray-500">Order Date:</span>
-                            <span className="font-medium">{selectedOrder.date}</span>
+                            <span className="font-medium">{date.format(new Date(selectedOrder.createdAt), "MMM DD YYYY")}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Status:</span>
-                            <span className={`${selectedOrder.statusClass} px-2 py-1 rounded-full text-xs font-medium`}>
-                              {selectedOrder.status}
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium`}>
+                              <StatusComponent status={selectedOrder.status} />
                             </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Items:</span>
-                            <span className="font-medium">{selectedOrder.items.length}</span>
+                            <span className="font-medium">{selectedOrder.products.length}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Total:</span>
-                            <span className="font-medium">₹{selectedOrder.total.toFixed(2)}</span>
+                            <span className="font-medium">₹{selectedOrder.totalPrice.toFixed(2)}</span>
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Shipping Information */}
                       <div>
                         <h4 className="font-medium text-gray-900 mb-3 flex items-center">
@@ -477,7 +424,11 @@ const MyOrders = () => {
                         <div className="space-y-4">
                           <div>
                             <p className="text-gray-500">Shipping Address:</p>
-                            <p className="font-medium">{selectedOrder.shippingAddress}</p>
+                            <p className="font-medium">{selectedOrder.address?.name}</p>
+                            <p className="font-medium">{selectedOrder.address?.shopName}</p>
+                            <p className="font-medium">{selectedOrder.address?.address}</p>
+                            <p className="font-medium">{selectedOrder.address?.mobile}</p>
+                            <p className="font-medium">{selectedOrder.address?.pincode}</p>
                           </div>
                           {selectedOrder.trackingNumber && (
                             <div>
@@ -488,7 +439,7 @@ const MyOrders = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Order Items */}
                     <div className="mt-6">
                       <h4 className="font-medium text-gray-900 mb-3">Order Items</h4>
@@ -511,27 +462,27 @@ const MyOrders = () => {
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {selectedOrder.items.map((item, index) => (
+                            {selectedOrder.products.map((item, index) => (
                               <tr key={index}>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="flex items-center">
                                     <div className="flex-shrink-0 h-10 w-10">
-                                      <img className="h-10 w-10 rounded" src={item.image} alt={item.name} />
+                                      <img className="h-10 w-10 rounded object-cover" src={item.productId?.imageURL} alt={item.name} />
                                     </div>
                                     <div className="ml-4">
-                                      <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                                      <div className="text-sm font-medium text-gray-900">{item.productId?.name}</div>
                                     </div>
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-500">₹{item.price.toFixed(2)}</div>
+                                  <div className="text-sm text-gray-500">₹{item.offer.toFixed(2)}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm text-gray-500">{item.quantity}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-medium text-gray-900">
-                                    ₹{(item.price * item.quantity).toFixed(2)}
+                                    ₹{(item.totalPrice).toFixed(2)}
                                   </div>
                                 </td>
                               </tr>
@@ -540,28 +491,25 @@ const MyOrders = () => {
                         </table>
                       </div>
                     </div>
-                    
+
                     {/* Payment Information */}
                     <div className="mt-6">
                       <h4 className="font-medium text-gray-900 mb-3 flex items-center">
                         <MdOutlinePayment className="mr-2 text-indigo-600" /> Payment Information
                       </h4>
                       <div className="space-y-4">
-                        {/* <div className="flex justify-between">
-                          <span className="text-gray-500">Payment Method:</span>
-                          <span className="font-medium">{selectedOrder.paymentMethod}</span>
-                        </div> */}
+                    
                         <div className="flex justify-between">
                           <span className="text-gray-500">Subtotal:</span>
-                          <span className="font-medium">₹{selectedOrder.total.toFixed(2)}</span>
+                          <span className="font-medium">₹{selectedOrder.totalPrice.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Shipping:</span>
-                          <span className="font-medium">₹5.99</span>
+                          <span className="font-medium">₹0.00</span>
                         </div>
                         <div className="flex justify-between border-t pt-2">
                           <span className="text-gray-500 font-medium">Total:</span>
-                          <span className="font-bold">₹{(selectedOrder.total + 5.99).toFixed(2)}</span>
+                          <span className="font-bold">₹{(selectedOrder.totalPrice + 0).toFixed(2)}</span>
                         </div>
                       </div>
                     </div>

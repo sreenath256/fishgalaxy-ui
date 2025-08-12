@@ -29,10 +29,10 @@ const cartSlice = createSlice({
     calculateTotalPrice: (state) => {
       let sum = state.cart.reduce(
         (total, item) =>
-          total + (item.product.price + item.product.markup) * item.quantity,
+          total + (item.product.offer ) * item.quantity,
         0
       );
-      state.tax = sum * 0.08;
+      state.tax = sum * 0.00;
       state.totalPrice = sum;
     },
     clearCartOnOrderPlaced: (state) => {

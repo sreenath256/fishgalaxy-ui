@@ -3,6 +3,7 @@ import {
   getProducts,
   createProduct,
   updateProduct,
+  deleteProduct,
 } from "../../actions/admin/productActions";
 
 const productSlice = createSlice({
@@ -66,7 +67,17 @@ const productSlice = createSlice({
         state.loading = false;
         state.products = null;
         state.error = payload;
-      });
+      })
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.products = state.products.filter(
+
+          (product) => {
+              console.log("Deleting product:", action.payload)
+              console.log("Remaining products:", product)
+              return product._id !== action.payload.product._id
+          }
+        );
+      })
   },
 });
 

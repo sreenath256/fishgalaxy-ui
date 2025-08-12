@@ -1,181 +1,206 @@
-import React, { useState } from 'react';
-import { FiTrash2, FiPlus, FiMinus } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
-import { pr1 } from '../assets';
-
-// Assuming you have these images imported
-// import pr1 from './path-to-your-image.jpg';
+import React, { useEffect, useState } from "react";
+import { FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import {
+  getCart,
+  deleteEntireCart,
+  deleteOneProduct,
+  applyCoupon,
+  incrementCount,
+  decrementCount,
+} from "../redux/actions/user/cartActions";
+import { calculateTotalPrice } from "../redux/reducers/user/cartSlice";
+import { EmptyCart } from "../assets/index";
+import ConfirmBox from "../components/admin/ConfrimBox";
+import { GoPlus } from "react-icons/go";
+import { BarLoader } from "react-spinners";
 
 const CartPage = () => {
-    const [products, setProducts] = useState([
-        {
-          image: pr1,
-          price: 100,
-          name: "Product 1",
-          quantity: 1,
-          id: 1
-        },
-        {
-          image: pr1,
-          price: 100,
-          name: "Product 2",
-          quantity: 1,
-          id: 2
-        },
-        {
-          image: pr1,
-          price: 100,
-          name: "Product 3",
-          quantity: 1,
-          id: 3
-        },
-        {
-          image: pr1,
-          price: 100,
-          name: "Product 4",
-          quantity: 1,
-          id: 4
-        },
-       
-      ]);
-    
-      // Increment quantity
-      const incrementQuantity = (productId) => {
-        setProducts(products.map(product => 
-          product.id === productId 
-            ? { ...product, quantity: product.quantity + 1 } 
-            : product
-        ));
-      };
-    
-      // Decrement quantity (minimum 1)
-      const decrementQuantity = (productId) => {
-        setProducts(products.map(product => 
-          product.id === productId && product.quantity > 1
-            ? { ...product, quantity: product.quantity - 1 } 
-            : product
-        ));
-      };
-    
-      // Remove product
-      const removeProduct = (productId) => {
-        setProducts(products.filter(product => product.id !== productId));
-      };
-    
-      // Calculate subtotal
-      const subtotal = products.reduce(
-        (total, product) => total + (product.price * product.quantity), 
-        0
-      );
+  const dispatch = useDispatch();
+  const { cart, loading, cartId, couponCode } = useSelector((state) => state.cart);
 
-      // Shipping cost (you can make this dynamic)
-      const shippingCost = subtotal > 0 ? 15 : 0;
-      const total = subtotal + shippingCost;
+  const [inputCouponCode, setInputCouponCode] = useState("");
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showProductConfirm, setShowProductConfirm] = useState(false);
+  const [productId, setProductId] = useState("");
+
+  useEffect(() => {
+    dispatch(getCart());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(calculateTotalPrice());
+    setInputCouponCode(couponCode);
+  }, [cart]);
+
+  const dispatchApplyCoupon = () => {
+    if (inputCouponCode.trim() !== "") {
+      dispatch(applyCoupon(inputCouponCode.trim()));
+    }
+  };
+
+  const toggleConfirm = () => {
+    if (cart.length > 0) {
+      setShowConfirm(!showConfirm);
+    } else {
+      toast.error("Nothing in the cart");
+    }
+  };
+
+  const deleteCart = () => {
+    toggleConfirm();
+    dispatch(deleteEntireCart(cartId));
+  };
+
+  const toggleProductConfirm = (id) => {
+    setProductId(id);
+    setShowProductConfirm(!showProductConfirm);
+  };
+
+  const dispatchDeleteProduct = () => {
+    console.log("CartId", cartId)
+    console.log("productId", productId)
+    toggleProductConfirm("");
+    dispatch(deleteOneProduct({ cartId, id: productId }))
+      .unwrap()
+      .then(() => {
+        dispatch(getCart());
+      })
+      .catch((err) => {
+        toast.error("Failed to remove product");
+      });
+
+  };
+
+
+
+  const subtotal = cart?.reduce(
+    (total, product) => total + product.product.price * product.quantity,
+    0
+  );
+
+  const shippingCost = subtotal > 0 ? 15 : 0;
+  const total = subtotal + shippingCost;
+
+
+
+
 
   return (
-    <div className="w-[95%] md:w-11/12 mx-auto py-8 ">
+    <div className="w-[95%] md:w-11/12 mx-auto py-8">
+      {showConfirm && (
+        <ConfirmBox
+          isOpen={showConfirm}
+          title="Confirm Clearing Cart?"
+          onConfirm={deleteCart}
+          onClose={toggleConfirm}
+          confirmText="Clear"
+
+        />
+      )}
+      {showProductConfirm && (
+        <ConfirmBox
+          isOpen={showProductConfirm}
+          title="Confirm Delete?"
+          onConfirm={dispatchDeleteProduct}
+          onClose={() => toggleProductConfirm("")}
+          confirmText="Delete"
+        />
+      )}
       <h1 className="text-xl md:text-2xl font-semibold mb-8">Your Shopping Cart</h1>
-      
-      {products.length === 0 ? (
-        <div className="text-center py-12">
-          <h2 className="md:text-2xl font-semibold mb-4">Your cart is empty</h2>
-          <Link 
-            to="/shop" 
-            className="inline-block bg-mainclr text-white px-6 py-3 rounded-md hover:bg-mainhvr transition-colors"
+
+      {cart?.length === 0 && !loading ? (
+        <div className=" text-center py-12 min-h-[50vh]">
+          <img src={EmptyCart} alt="Empty Cart" className="mx-auto w-60" />
+          <h2 className="text-lg font-semibold mt-4">Your cart is empty</h2>
+          <Link
+            to="/"
+            className="inline-block mt-4 bg-mainclr text-white px-6 py-3 rounded-md hover:bg-mainhvr"
           >
             Continue Shopping
           </Link>
         </div>
+      ) : loading ? (
+        <p>
+          Loading
+        </p>
       ) : (
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}
           <div className="lg:w-2/3">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              {/* Table Header */}
-              <div className="hidden md:grid grid-cols-12 bg-gray-100 p-4 border-b">
-                <div className="col-span-5 font-medium">Product</div>
-                <div className="col-span-2 font-medium text-center">Price</div>
-                <div className="col-span-3 font-medium text-center">Quantity</div>
-                <div className="col-span-2 font-medium text-right">Total</div>
+              {/* Table Headers for Desktop */}
+              <div className="hidden md:grid grid-cols-12 bg-gray-100 p-4 border-b font-medium text-sm">
+                <div className="col-span-5">Product</div>
+                <div className="col-span-2 text-center">Price</div>
+                <div className="col-span-3 text-center">Quantity</div>
+                <div className="col-span-2 text-right">Total</div>
               </div>
-              
+
               {/* Cart Items */}
-              {products.map((product) => (
-                <div key={product.id} className="p-4 border-b last:border-b-0 flex flex-col md:grid md:grid-cols-12 gap-4">
+              {cart?.map((item) => (
+                <div
+                  key={item._id}
+                  className="p-4 border-b last:border-b-0 md:grid md:grid-cols-12 flex flex-col gap-4"
+                >
                   {/* Product Info */}
-                  <div className="flex items-center col-span-5">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
+                  <div className="col-span-5 flex items-center">
+                    <img
+                      src={item.product.imageURL || "https://via.placeholder.com/100"}
+                      alt={item.product.name}
                       className="w-20 h-20 object-cover rounded mr-4"
                     />
                     <div>
-                      <h3 className="font-medium">{product.name}</h3>
-                      <button 
-                        onClick={() => removeProduct(product.id)}
-                        className="text-red-500 hover:text-red-700 flex items-center mt-1 text-sm"
+                      <h3 className="font-semibold text-sm">{item.product.name}</h3>
+                      <button
+                        onClick={() => toggleProductConfirm(item._id)}
+                        className="text-red-500 hover:text-red-700 flex items-center mt-1 text-xs"
                       >
-                        <FiTrash2 className="mr-1" /> Remove
+                        <FiTrash2 className="mr-1" size={14} /> Remove
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Price */}
-                  <div className="flex items-center col-span-2 justify-center">
-                    <span className="md:hidden mr-2 font-medium">Price:</span>
-                    <span>₹{product.price.toFixed(2)}</span>
+                  <div className="col-span-2 flex items-center justify-center md:justify-center text-sm">
+                    ₹{item.product.offer.toFixed(2)}
                   </div>
-                  
-                  {/* Quantity Controls */}
-                  <div className="flex items-center col-span-3 justify-center">
-                    <span className="md:hidden mr-2 font-medium">Qty:</span>
-                    <div className="flex items-center border rounded-md">
-                      <button 
-                        onClick={() => decrementQuantity(product.id)}
-                        className="px-3 py-1 h-full text-gray-600 hover:bg-gray-100"
-                      >
-                        <FiMinus />
-                      </button>
-                      <span className="px-4 py-1 border-x">{product.quantity}</span>
-                      <button 
-                        onClick={() => incrementQuantity(product.id)}
-                        className="px-3 py-1 h-full  text-gray-600 hover:bg-gray-100"
-                      >
-                        <FiPlus />
-                      </button>
-                    </div>
+
+                  {/* Quantity */}
+                  <div className="col-span-3 flex items-center justify-center">
+                    <QuantityUpdateBar item={item} />
                   </div>
-                  
+
                   {/* Total */}
-                  <div className="flex items-center col-span-2 justify-end">
-                    <span className="md:hidden mr-2 font-medium">Total:</span>
-                    <span className="font-medium">
-                      ₹{(product.price * product.quantity).toFixed(2)}
-                    </span>
+                  <div className="col-span-2 flex items-center justify-end text-sm font-medium">
+                    ₹{(item.product.offer * item.quantity).toFixed(2)}
                   </div>
                 </div>
               ))}
             </div>
-            
-            {/* Continue Shopping */}
+
             <div className="mt-6">
-              <Link 
-                to="/shop" 
-                className="text-mainclr hover:text-mainhvr flex items-center"
+              <button
+                onClick={toggleConfirm}
+                className="text-red-600 hover:text-red-800 font-medium"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-                </svg>
+                Clear Cart
+              </button>
+              <Link
+                to="/"
+                className="ml-4 text-mainclr hover:text-mainhvr font-medium"
+              >
                 Continue Shopping
               </Link>
             </div>
           </div>
-          
+
           {/* Order Summary */}
           <div className="lg:w-1/3">
             <div className="bg-white rounded-lg border shadow-md p-6 sticky top-20">
               <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
@@ -183,24 +208,20 @@ const CartPage = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>{shippingCost > 0 ? `₹${shippingCost.toFixed(2)}` : 'Free'}</span>
+                  <span>{shippingCost > 0 ? `₹${shippingCost}` : "Free"}</span>
                 </div>
                 <div className="border-t pt-4 flex justify-between font-bold text-lg">
                   <span>Total</span>
                   <span>₹{total.toFixed(2)}</span>
                 </div>
               </div>
-              
-                <Link to={'/checkout'}>
-              <button className="w-full bg-mainclr text-white py-3 rounded-md hover:bg-mainhvr transition-colors font-medium">
-                Proceed to Checkout
-              </button>
-                </Link>
-              
-             
+
+              <Link to="/checkout">
+                <button className="w-full bg-mainclr text-white py-3 rounded-md hover:bg-mainhvr font-medium">
+                  Proceed to Checkout
+                </button>
+              </Link>
             </div>
-            
-         
           </div>
         </div>
       )}
@@ -209,3 +230,71 @@ const CartPage = () => {
 };
 
 export default CartPage;
+
+
+const QuantityUpdateBar = ({ item }) => {
+  const { cart, loading, cartId, totalPrice } = useSelector(
+    (state) => state.cart
+  );
+
+  const dispatch = useDispatch()
+  const [buttonLoading, setButtonLoading] = useState(false)
+
+  const incrementQuantity = async (id) => {
+    setButtonLoading(true)
+    if (id) {
+      const res = await dispatch(
+        incrementCount({ cartId, productId: id })
+      );
+    }
+
+    setButtonLoading(false)
+  };
+
+  const decrementQuantity = async (id) => {
+    setButtonLoading(true)
+    if (id) {
+      const res = await dispatch(
+        decrementCount({ cartId, productId: id })
+      );
+    }
+    setButtonLoading(false)
+
+  };
+
+
+
+  return (
+    <div
+      className={`flex h-fit  items-center border border-black rounded-lg overflow-hidden text-sm ${buttonLoading && "!border-0"
+        } `}
+    >
+      {buttonLoading ? (
+        <BarLoader color="#00756b" width={"72px"} height={"24px"} />
+      ) : (
+        <>
+          <button
+            className={`w-6 grid place-items-center h-6 ${item.quantity === 1
+              ? "bg-black text-white cursor-not-allowed"
+              : "bg-black hover:bg-white text-white hover:text-black cursor-pointer"
+              } duration-200`}
+            disabled={item.quantity === 1 || buttonLoading}
+            onClick={() => decrementQuantity(item.product._id)}
+          >
+            <FiMinus />
+          </button>
+          <span className="w-6 grid place-items-center h-6">
+            {item.quantity}
+          </span>
+          <button
+            className={`w-6 grid place-items-center h-6 bg-black hover:bg-white text-white hover:text-black cursor-pointer duration-200`}
+            onClick={() => incrementQuantity(item.product._id)}
+            disabled={buttonLoading}
+          >
+            <GoPlus />
+          </button>
+        </>
+      )}
+    </div>
+  )
+}

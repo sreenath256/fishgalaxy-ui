@@ -87,11 +87,7 @@ const LoginForm = ({ setActiveTab, setMobile }) => {
 
   useEffect(() => {
     if (user) {
-      if (!user.isEmailVerified) {
-        navigate("/otp");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     }
     return () => {
       dispatch(updateError(""));
@@ -176,16 +172,7 @@ const LoginForm = ({ setActiveTab, setMobile }) => {
             </Field>
             {error && <p className="my-2 text-red-400">{error}</p>}
 
-            {/* <input
-            type="number"
-            id="mobile"
-            inputMode="numeric"
-            value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-mainclr focus:border-transparent transition"
-            placeholder="Enter your mobile number"
-            required
-          /> */}
+
           </div>
           <div className="mb-4">
 
@@ -218,35 +205,29 @@ const LoginForm = ({ setActiveTab, setMobile }) => {
 
 
 
+
 const OTPVerification = ({ setActiveTab, mobile }) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const dispatch = useDispatch();
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(30);
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
 
-  const [minutes, setMinutes] = useState(4);
-  const [seconds, setSeconds] = useState(59);
-
-  const [resendSeconds, setResendSeconds] = useState(30);
-  const [resendLoading, setResendLoading] = useState(false);
-
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleChange = (e, index) => {
     const updatedOtp = [...otp];
     const value = e.target.value;
 
     if (value === "") {
-      // If backspace is pressed, remove the number and move back to the previous box
       updatedOtp[index] = "";
       if (index > 0) {
         document.getElementById(`otp-input-${index - 1}`).focus();
       }
     } else if (!isNaN(value) && value.length <= 1) {
-      // Check if the input is a number
       updatedOtp[index] = value;
-
       if (index < otp.length - 1) {
         document.getElementById(`otp-input-${index + 1}`).focus();
       }
@@ -255,13 +236,8 @@ const OTPVerification = ({ setActiveTab, mobile }) => {
     setOtp(updatedOtp);
   };
 
-
-  // Copy pasting otp
-  // Handle paste event
   const handlePaste = (e) => {
     const pastedData = e.clipboardData.getData("text/plain");
-
-    // Distribute the pasted content across input boxes
     for (let i = 0; i < otp.length; i++) {
       if (pastedData[i] && !isNaN(pastedData[i])) {
         document.getElementById(`otp-input-${i}`).value = pastedData[i];
@@ -272,18 +248,12 @@ const OTPVerification = ({ setActiveTab, mobile }) => {
         });
       }
     }
-
-    // Set focus on the last input box
     document.getElementById(`otp-input-${otp.length - 1}`).focus();
-
     e.preventDefault();
   };
 
-
-  // OTP Submission function
   const handleOTPSubmit = async (e) => {
     e.preventDefault();
-
     let otpNumber = parseInt(otp.join(""));
     if (otpNumber.toString().split("").length < 6) {
       setError("OTP is not valid");
@@ -302,23 +272,47 @@ const OTPVerification = ({ setActiveTab, mobile }) => {
     );
 
     if (res.success) {
-      console.log("Login successful:", res.data);
+      console.log("Login successful:", res);
       setLoading(false);
-
       dispatch(getUserDataFirst());
       navigate("/");
     } else {
       toast.error(res.response.data.error);
       setError(res.response.data.error);
       setLoading(false);
-
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle OTP verification logic here
-    console.log("OTP:", otp.join(""));
+  // Countdown timer effect
+  useEffect(() => {
+    let timer;
+    if (isResendDisabled && resendCooldown > 0) {
+      timer = setTimeout(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    } else if (resendCooldown === 0) {
+      setIsResendDisabled(false);
+    }
+
+    return () => clearTimeout(timer);
+  }, [resendCooldown, isResendDisabled]);
+
+  const handleResendOTP = async () => {
+    setResendCooldown(30);
+    setIsResendDisabled(true);
+
+    const res = await commonRequest(
+      "POST",
+      "/auth/resend-otp",
+      { mobile },
+      appJson
+    );
+
+    if (res.success) {
+      toast.success("OTP resent successfully!");
+    } else {
+      toast.error(res.response?.data?.error || "Failed to resend OTP");
+    }
   };
 
   return (
@@ -331,7 +325,9 @@ const OTPVerification = ({ setActiveTab, mobile }) => {
         >
           <FaArrowLeft size={18} />
         </button>
-        <h2 className="text-xl md:text-2xl text-center font-medium text-gray-800">OTP Verification</h2>
+        <h2 className="text-xl md:text-2xl text-center font-medium text-gray-800">
+          OTP Verification
+        </h2>
       </div>
       <p className="text-gray-600 mb-6">
         We've sent a verification code to your mobile number
@@ -349,9 +345,15 @@ const OTPVerification = ({ setActiveTab, mobile }) => {
             placeholder="-"
             onChange={(e) => handleChange(e, index)}
             onPaste={(e) => handlePaste(e)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && index === otp.length - 1) {
+                handleOTPSubmit(e);
+              }
+            }}
           />
         ))}
       </div>
+
       {error && <p className="my-2 text-red-400">{error}</p>}
 
       <button
@@ -363,6 +365,22 @@ const OTPVerification = ({ setActiveTab, mobile }) => {
       </button>
 
       <div className="text-center">
+        {isResendDisabled ? (
+          <p className="text-gray-500 text-sm">
+            Resend OTP in {resendCooldown} seconds
+          </p>
+        ) : (
+          <button
+            type="button"
+            onClick={handleResendOTP}
+            className="text-mainclr hover:text-blue-800 text-sm font-medium"
+          >
+            Resend OTP
+          </button>
+        )}
+      </div>
+
+      <div className="text-center mt-2">
         <button
           type="button"
           onClick={() => setActiveTab("login")}
@@ -373,8 +391,7 @@ const OTPVerification = ({ setActiveTab, mobile }) => {
         </button>
       </div>
     </>
-
   );
 };
 
-export default LoginSignup;
+export default LoginSignup

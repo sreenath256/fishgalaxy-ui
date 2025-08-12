@@ -1,8 +1,8 @@
 import { handleError } from "./configurations";
 import axios from "axios";
 
-export const URL = "https://fishgalaxy-server.onrender.com/api";
-// export const URL = "http://localhost:3000/api";
+// export const URL = "https://fishgalaxy-server.onrender.com/api";
+export const URL = "http://localhost:3000/api";
 export const CloudinaryURL = "https://res.cloudinary.com/dkm2bwlao/image/upload"
 
 const apiInstance = axios.create({

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   FiPlus,
   FiSave,
@@ -7,501 +7,414 @@ import {
   FiImage,
   FiTrash2,
 } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { getCategories } from "../../redux/actions/admin/categoriesAction";
+import ConfirmBox from "../../components/admin/ConfrimBox";
+import CustomSingleFileInput from "../../components/admin/CustomSingleFileInput";
+import CustomFileInput from "../../components/admin/CustomFileInput";
+import toast from "react-hot-toast";
+import { createProduct } from "../../redux/actions/admin/productActions";
 
 const AddProducts = () => {
-  const allCategories = [
-    "New Arrivals",
-    "Best Offers",
-    "Live Plants",
-    "Starters",
-    "Aquarium Essentials",
-    "Aquarium Food",
-    "Aquarium Filters",
-    "Aquarium Supplyment",
-    "Aquarium Tanks",
-    "Aquarium Lights",
-    "Aquarium Driftwoods",
-    "Aquarium Toys",
-  ];
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [newProduct, setNewProduct] = useState({
-    id: Date.now(),
-    name: "",
-    price: "",
-    offerPrice: "",
-    stock: "",
-    categories: [],
-    images: [],
-    description: "",
-  });
+  const categoryRef = useRef(null);
+  const statusRef = useRef(null);
 
-  const [newImageUrl, setNewImageUrl] = useState("");
-  const [isDragActive, setIsDragActive] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(null);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewProduct((prev) => ({
-      ...prev,
-      [name]:
-        name === "price" || name === "offerPrice" || name === "stock"
-          ? Number(value)
-          : value,
-    }));
+
+  const { categories, loading, error } = useSelector(
+    (state) => state.categories
+  );
+
+  useEffect(() => {
+    // Create proper query string
+    const queryString = new URLSearchParams({
+      page: 1,
+      limit: 1000
+    }).toString();
+
+    dispatch(getCategories(queryString));
+  }, [dispatch]);
+
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [offer, setOffer] = useState("");
+  const [category, setCategory] = useState("");
+  const [imageURL, setImageURL] = useState("");
+  const [moreImageURL, setMoreImageURL] = useState("");
+  const [isOfferProduct, setIsOfferProduct] = useState(false);
+  const [isLatestProduct, setIsLatestProduct] = useState(false);
+  const [status, setStatus] = useState("Stocked");
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+
+
+  const handleSingleImageInput = (img) => {
+    setImageURL(img);
   };
 
-  const handleCategoryChange = (category) => {
-    setNewProduct((prev) => {
-      if (prev.categories.includes(category)) {
-        return {
-          ...prev,
-          categories: prev.categories.filter((c) => c !== category),
-        };
-      } else {
-        return {
-          ...prev,
-          categories: [...prev.categories, category],
-        };
+  const handleMultipleImageInput = (files) => {
+    setMoreImageURL(files);
+  };
+
+  const handleSave = async () => {
+    if (price <= 0) {
+      toast.error("Price Should be greater than 0");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("category", category);
+    formData.append("offer", offer);
+    formData.append("isOfferProduct", isOfferProduct);
+    formData.append("isLatestProduct", isLatestProduct);
+    formData.append("status", status.toLowerCase());
+    formData.append("imageURL", imageURL);
+
+    for (const file of moreImageURL) {
+      formData.append("moreImageURL", file);
+    }
+
+    await dispatch(createProduct(formData));
+    navigate(-1);
+  };
+
+  const toggleConfirm = () => {
+    if (!isFormValid()) {
+      toast.error("Please fill in all required fields before saving.");
+      return;
+    }
+    setShowConfirm(!showConfirm);
+  };
+
+  const isFormValid = () => {
+    return (
+      name.trim() !== "" &&
+      description.trim() !== "" &&
+      price > 0 &&
+      category &&
+      status &&
+      imageURL
+    );
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (categoryRef.current && !categoryRef.current.contains(event.target)) {
+        setDropdownOpen(false);
       }
-    });
-  };
+      if (statusRef.current && !statusRef.current.contains(event.target)) {
+        setStatusDropdownOpen(false);
+      }
+    };
 
-  const addNewImage = () => {
-    if (newImageUrl.trim() && !newProduct.images.includes(newImageUrl)) {
-      setNewProduct((prev) => ({
-        ...prev,
-        images: [...prev.images, newImageUrl.trim()],
-      }));
-      setNewImageUrl("");
-    }
-  };
+    document.addEventListener("mousedown", handleClickOutside);
 
-  const removeImage = (index) => {
-    const newImages = [...newProduct.images];
-    newImages.splice(index, 1);
-    setNewProduct((prev) => ({
-      ...prev,
-      images: newImages,
-    }));
-  };
-
-  const setPrimaryImage = (index) => {
-    const newImages = [...newProduct.images];
-    const [removed] = newImages.splice(index, 1);
-    newImages.unshift(removed);
-    setNewProduct((prev) => ({
-      ...prev,
-      images: newImages,
-    }));
-  };
-
-  // Simulate file upload (in a real app, you would upload to a server)
-  const handleFileUpload = (files) => {
-    setUploadProgress(0);
-
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-
-    // Process each file (in a real app, you would upload to a server)
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        // In a real app, you would get the URL from your server after upload
-        const imageUrl = e.target.result;
-
-        setNewProduct((prev) => ({
-          ...prev,
-          images: [...prev.images, imageUrl],
-        }));
-
-        // Reset progress after a short delay
-        setTimeout(() => {
-          setUploadProgress(null);
-        }, 500);
-      };
-
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleDrag = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setIsDragActive(true);
-    } else if (e.type === "dragleave") {
-      setIsDragActive(false);
-    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
-
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files);
-    }
-  }, []);
-
-  const handleFileInputChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFileUpload(e.target.files);
-      // Reset file input
-      e.target.value = null;
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("New product:", newProduct);
-    alert("Product added successfully! (Not actually saved in this demo)");
-    setNewProduct({
-      id: Date.now(),
-      name: "",
-      price: "",
-      offerPrice: "",
-      stock: "",
-      categories: [],
-      images: [],
-      description: "",
-    });
-  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="">
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-5 border-b border-gray-200">
-            <h1 className="text-xl font-medium text-gray-800">
-              Add New Product
-            </h1>
-          </div>
-
-          <form onSubmit={handleSubmit} className="px-6 py-5">
-            <div className="grid grid-cols-1 gap-6">
-              {/* Product Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Product Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={newProduct.name}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={newProduct.description}
-                  onChange={handleInputChange}
-                  rows="3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-                />
-              </div>
-
-              {/* Price Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Regular Price (₹)
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={newProduct.price}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Offer Price (₹)
-                  </label>
-                  <input
-                    type="number"
-                    name="offerPrice"
-                    value={newProduct.offerPrice}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    min="0"
-                    step="0.01"
-                    placeholder="Optional"
-                  />
-                </div>
-              </div>
-
-              {/* Stock */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Stock Quantity
-                </label>
-                <input
-                  type="number"
-                  name="stock"
-                  value={newProduct.stock}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-                  min="0"
-                />
-              </div>
-
-              {/* Categories */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Categories
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {allCategories.map((category) => (
-                    <button
-                      key={category}
-                      type="button"
-                      onClick={() => handleCategoryChange(category)}
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        newProduct.categories.includes(category)
-                          ? "bg-indigo-600 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-                {newProduct.categories.length > 0 && (
-                  <p className="mt-2 text-sm text-gray-500">
-                    Selected: {newProduct.categories.join(", ")}
-                  </p>
-                )}
-              </div>
+    <>
+      {showConfirm && (
+        <ConfirmBox
+          title="Confirm Save?"
+          onClose={toggleConfirm}
+          onConfirm={handleSave}
+          confirmText={"Save"}
+          isOpen={showConfirm}
+        />
+      )}
+      <div className="min-h-screen bg-gray-50">
+        <div className="">
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-200">
+              <h1 className="text-xl font-medium text-gray-800">
+                Add New Product
+              </h1>
             </div>
 
-            {/* Images Section */}
-            <div className="pt-5">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Images
-              </label>
+            <div className="p-3">
+              <div className="grid grid-cols-1 gap-6">
+                {/* Product Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Product Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  />
+                </div>
 
-              <div className="flex flex-wrap gap-5">
-                {/* Main Image Preview (same as before) */}
-              {newProduct.images.length > 0 ? (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500 mb-2">Primary Image</p>
-                  <div className="h-64 w-64 bg-gray-100 rounded-lg overflow-hidden relative group">
-                    <img
-                      src={newProduct.images[0]}
-                      alt="Primary product"
-                      className="h-full w-full object-cover"
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows="3"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  />
+                </div>
+
+                {/* Price Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Regular Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                      min="0"
+                      step="0.01"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black bg-opacity-50 transition-opacity">
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Offer Price (₹)
+                    </label>
+                    <input
+                      type="number"
+                      name="offerPrice"
+                      value={offer}
+                      onChange={(e) => setOffer(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+
+                {/* Categories */}
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                  <div className="relative" ref={categoryRef}>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Categories
+                    </label>
+                    <div className="relative">
                       <button
                         type="button"
-                        onClick={() => {
-                          if (newProduct.images.length > 1) {
-                            const newImages = [...newProduct.images];
-                            newImages.shift();
-                            setNewProduct((prev) => ({
-                              ...prev,
-                              images: newImages,
-                            }));
-                          } else {
-                            setNewProduct((prev) => ({
-                              ...prev,
-                              images: [],
-                            }));
-                          }
-                        }}
-                        className="p-2 text-white hover:text-red-200"
-                        title="Delete image"
+                        onClick={toggleDropdown}
+                        className="w-full bg-gray-100 rounded-md py-2 px-3 text-sm outline-none border border-gray-200 text-left flex justify-between items-center"
                       >
-                        <FiTrash2 className="h-5 w-5" />
+                        {category ? (
+                          categories.find(c => c._id === category)?.name || "Choose a category"
+                        ) : (
+                          "Choose a category"
+                        )}
+                        <svg
+                          className={`h-5 w-5 text-gray-400 transform transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
                       </button>
+                      {dropdownOpen && (
+                        <div
+                          className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
+                        >
+                          {loading ? (
+                            <div className="py-2 text-center text-gray-500">
+                              Loading categories...
+                            </div>
+                          ) : (
+                            categories.map((cat) => (
+                              <div
+                                key={cat._id}
+                                className={`cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-50 ${category === cat._id ? "bg-indigo-100" : ""}`}
+                                onClick={() => {
+                                  setCategory(cat._id);
+                                  setDropdownOpen(false);
+                                }}
+                              >
+                                <span className="font-normal block truncate">
+                                  {cat.name}
+                                </span>
+                                {category === cat._id && (
+                                  <span className="text-indigo-600 absolute inset-y-0 right-0 flex items-center pr-4">
+                                    <svg
+                                      className="h-5 w-5"
+                                      viewBox="0 0 20 20"
+                                      fill="currentColor"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  </span>
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="relative px-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Product Status
+                    </label>
+                    <div className="relative" ref={statusRef}>
+                      <button
+                        type="button"
+                        onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+                        className="w-full bg-white rounded-md py-2 px-3 text-sm outline-none border border-gray-200 text-left flex justify-between items-center"
+                      >
+                        {status}
+                        <svg
+                          className={`h-5 w-5 text-gray-400 transform transition-transform ${statusDropdownOpen ? "rotate-180" : ""}`}
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                      {statusDropdownOpen && (
+                        <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                          {["Stocked", "Out of Stock"].map((option) => (
+                            <div
+                              key={option}
+                              className={`cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-50 ${status === option ? "bg-indigo-100" : ""}`}
+                              onClick={() => {
+                                setStatus(option);
+                                setStatusDropdownOpen(false);
+                              }}
+                            >
+                              <span className="font-normal block truncate">
+                                {option}
+                              </span>
+                              {status === option && (
+                                <span className="text-indigo-600 absolute inset-y-0 right-0 flex items-center pr-4">
+                                  <svg
+                                    className="h-5 w-5"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <h3 className="block text-sm font-medium text-gray-700 mb-2">Product Tags</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          id="isOfferProduct"
+                          checked={isOfferProduct}
+                          onChange={(e) => setIsOfferProduct(e.target.checked)}
+                          className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                        />
+                        <label htmlFor="isOfferProduct" className="text-sm text-gray-700">
+                          Offer Product
+                        </label>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          id="isLatestProduct"
+                          checked={isLatestProduct}
+                          onChange={(e) => setIsLatestProduct(e.target.checked)}
+                          className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                        />
+                        <label htmlFor="isLatestProduct" className="text-sm text-gray-700">
+                          Latest Product
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="mb-4 h-64 w-64 grid place-items-center p-4 bg-gray-50 rounded-lg text-center">
-                  <div>
-                    <FiImage className="mx-auto h-8 w-8 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-500">
-                    No primary image selected
-                  </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Additional Images (same as before) */}
-              {newProduct.images.length > 1 && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500 mb-2">
-                    Additional Images
-                  </p>
-                  <div className="flex gap-2">
-                    {newProduct.images.slice(1).map((image, index) => (
-                      <div key={index} className="relative group">
-                        <div className="h-24 w-24 bg-gray-100 rounded-md overflow-hidden">
-                          <img
-                            src={image}
-                            alt={`Product ${index + 2}`}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black bg-opacity-50 transition-opacity">
-                          <button
-                            type="button"
-                            onClick={() => setPrimaryImage(index + 1)}
-                            className="p-1 text-white hover:text-indigo-200 mr-1"
-                            title="Set as primary"
-                          >
-                            <FiImage className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index + 1)}
-                            className="p-1 text-white hover:text-red-200"
-                            title="Remove image"
-                          >
-                            <FiX className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
               </div>
 
-              {/* Add Image Section - Updated with Drag and Drop */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Add Image URL
+              {/* Images Section */}
+              <div className="pt-5">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Primary Image
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Paste image URL"
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={addNewImage}
-                    disabled={!newImageUrl.trim()}
-                    className={`px-3 py-2 rounded-md flex items-center ${
-                      newImageUrl.trim()
-                        ? "bg-indigo-600 text-white hover:bg-indigo-700"
-                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    }`}
-                  >
-                    <FiPlus className="mr-1" /> Add
-                  </button>
-                </div>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="px-2 bg-white text-sm text-gray-500">
-                      or
-                    </span>
-                  </div>
-                </div>
-
-                {/* Drag and Drop Area */}
-                <div
-                  className={`mt-4 border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                    isDragActive
-                      ? "border-indigo-500 bg-indigo-50"
-                      : "border-gray-300 hover:border-gray-400"
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragOver={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <div className="flex flex-col items-center justify-center space-y-2">
-                    <FiUpload className="h-8 w-8 text-gray-400" />
-                    <p className="text-sm text-gray-600">
-                      {isDragActive
-                        ? "Drop your images here"
-                        : "Drag and drop images here"}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Supports JPG, PNG up to 5MB
-                    </p>
-
-                    {/* Upload Progress Indicator */}
-                    {uploadProgress !== null && (
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                        <div
-                          className="bg-indigo-600 h-2.5 rounded-full"
-                          style={{ width: `${uploadProgress}%` }}
-                        ></div>
-                      </div>
-                    )}
-
-                    <label className="mt-4 cursor-pointer">
-                      <span className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Select Files
-                      </span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        multiple
-                        accept="image/*"
-                        onChange={handleFileInputChange}
-                      />
+                <p className="font-light my-2">Drop Here</p>
+                <div className="flex flex-wrap gap-5">
+                  <CustomSingleFileInput onChange={handleSingleImageInput} />
+                  <div className="admin-div">
+                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                     More images
                     </label>
+                    <p className="font-light my-2">Drop Here</p>
+                    <CustomFileInput onChange={handleMultipleImageInput} />
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Form Actions (same as before) */}
-            <div className="mt-8 flex justify-end gap-3">
-              <button
-                type="button"
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <FiSave className="inline mr-2" />
-                Save Product
-              </button>
+              {/* Form Actions */}
+              <div className="mt-8 flex justify-end gap-3">
+                <button
+                  onClick={() => navigate(-1)}
+                  type="button"
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={toggleConfirm}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  <FiSave className="inline mr-2" />
+                  Save Product
+                </button>
+              </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

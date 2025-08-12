@@ -5,30 +5,42 @@ import { Link, useNavigate } from "react-router-dom";
 import { MdAccountCircle, MdLogout, MdManageAccounts, MdShoppingBag } from "react-icons/md";
 import { IoMdCart } from "react-icons/io";
 import AllcategModal from "../components/products/allCateogmodal";
-import { categoryImages } from "./Data";
 import CartModal from "./products/CartModal";
 import { pr1 } from "../assets";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/actions/userActions";
+import axios from 'axios';
+import { URL } from "../Common/api";
+import { config } from "../Common/configurations";
+
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [error, setError] = useState(null);
+
+  const { cart, loading } = useSelector(
+    (state) => state.cart
+  );
+
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
-  const openModal = () => setIsModalOpen(true);
+  const openModal = () => {
+    setIsModalOpen(true);
+    if (categories.length === 0 && !loadingCategories) {
+      fetchCategories();
+    }
+  };
   const closeModal = () => setIsModalOpen(false);
   const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
 
   const { user } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-
-  // Get all unique categories from the categoryImages object
-  const categories = Object.keys(categoryImages);
 
   const menuRef = useRef(null);
   const profileRef = useRef(null);
@@ -37,9 +49,23 @@ const Header = () => {
   const menuItems = [
     { name: "Home", path: "/", active: true },
     { name: "Shop", path: "/shop", active: false },
-    // { name: "Cart", path: "/cart", active: false },
     { name: "About", path: "/about", active: false },
   ];
+
+  const fetchCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      setError(null);
+      const { data } = await axios.get(`${URL}/user/categories`, config);
+      console.log(data)
+      setCategories(data.categories || []);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load categories. Please try again.');
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -47,7 +73,6 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Close mobile menu if clicked outside
       if (
         isMobileMenuOpen &&
         menuRef.current &&
@@ -59,7 +84,6 @@ const Header = () => {
         }
       }
 
-      // Close profile modal if clicked outside
       if (
         isProfileOpen &&
         profileRef.current &&
@@ -84,6 +108,23 @@ const Header = () => {
     navigate("/");
   };
 
+  const noUser = () => (
+    <svg
+      className="h-8 w-8 text-mainclr"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"
+        fill="currentColor"
+      />
+      <path
+        d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
+        fill="white"
+      />
+    </svg>
+  )
 
   return (
     <header className="bg-white shadow-sm fixed w-full top-0 z-50">
@@ -140,9 +181,18 @@ const Header = () => {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={toggleProfile}
-                className="profile-button flex items-center border border-transparent text-sm font-medium rounded-full text-mainclr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr"
+                className="profile-button flex items-center border border-transparent text-sm font-medium rounded-full text-mainclr focus:outline-none ring-2 focus:ring-offset-2 focus:ring-mainclr"
               >
-                <MdAccountCircle className="text-3xl" />
+
+                {
+                  user.profileImgURL ?
+                    <img
+                      className="w-12 aspect-square rounded-full object-cover"
+                      src={user?.profileImgURL}
+                      alt="User"
+                    />
+                    : <MdAccountCircle className="text-3xl" />
+                }
               </button>
 
               {/* Profile dropdown */}
@@ -150,11 +200,16 @@ const Header = () => {
                 <div className="absolute -left-10 md:left-auto md:right-0 mt-5 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                   <div className="px-4 py-2 border-b border-gray-200">
                     <div className="flex items-center overflow-hidden">
-                      <img
-                        className="h-8 w-8 rounded-full object-cover"
-                        src={pr1}
-                        alt="User"
-                      />
+
+                      {
+                        user?.profileImgURL ?
+                          <img
+                            className="h-8 w-8 rounded-full object-cover"
+                            src={user?.profileImgURL}
+                            alt="User"
+                          />
+                          : <MdAccountCircle className="text-3xl text-mainclr" />
+                    }
                       <div className="ml-2">
                         <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                         {
@@ -197,8 +252,15 @@ const Header = () => {
               className="relative cursor-pointer flex items-center font-medium rounded-md text-mainclr"
             >
               <IoMdCart className="mr-2 text-2xl" />
-              <span className="absolute bg-red-500 w-4 h-4 rounded-full text-[10px] grid place-items-center  -right-1 -top-2 text-white">2</span>
+              {cart && cart.length !== 0 && (
+                <span className="absolute bg-red-500 w-4 h-4 rounded-full text-[10px] grid place-items-center  -right-1 -top-2 text-white">
+                  {cart.length !== 0 && cart.length}
+                </span>
+              )}
             </div>
+
+
+
 
             {/* Mobile menu button */}
             <button
@@ -246,21 +308,13 @@ const Header = () => {
       </div>
 
       {/* All Categories Modal */}
-      <AllcategModal isOpen={isModalOpen} onClose={closeModal}>
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">All Categories</h2>
-          <ul className="space-y-2">
-            {categories.map((category, i) => (
-              <li
-                key={i}
-                className="p-2 hover:bg-gray-100 hover:text-mainclr duration-200 cursor-pointer"
-              >
-                {category}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </AllcategModal>
+      <AllcategModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        categories={categories}
+        loading={loadingCategories}
+        error={error}
+      />
 
       {/* Cart Modal */}
       <CartModal isOpen={isCartOpen} onClose={closeCart} />
