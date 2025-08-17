@@ -109,9 +109,10 @@ function App() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [showContent, setShowContent] = useState(false);
 
-  const { user } = useSelector((state) => state.user);
+  const { user, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
+  console.log(loading)
   useEffect(() => {
     if (!user) {
       dispatch(getUserDataFirst());
@@ -126,97 +127,121 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // if (loading) {
+  //   setShowContent(true)
+  // } else {
+  //   setShowContent(false)
+  // }
+
+
+  // if (loading) (
+  //   <div className="w-full h-screen bg-red-500 flex justify-center items-center ">
+  //     <h1 className="text-[80px] text-white">Loading</h1>
+
+  //   </div>
+  // )
+
   return (
     <>
-      <Toaster position="top-center" />
-      <Preloader isComplete={!initialLoading} />
+      {
+        loading ?
+       
+            <Preloader  />
+          :
+          (
+            <>
 
-      <div
-        className={`transition-opacity duration-500 ${
-          showContent ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {showContent && (
-          <BrowserRouter>
-            {user ? user.role === "user" && <Header /> : <UserHeader />}
-            <Routes>
-              {/* Landing route */}
-              <Route
-                path="/"
-                element={
-                  user ? (
-                    user.role === "admin" || user.role === "superAdmin" ? (
-                      <Navigate to="/admin" />
-                    ) : (
-                      <Home />
-                    )
-                  ) : (
-                    <Welcome />
-                  )
-                }
-              />
 
-              {/* User routes */}
-              <Route
-                element={
-                  <ProtectedRoute
-                    allowedRoles={["user", "retailer"]}
-                    element={<RetailerLayout />}
-                  />
-                }
+              <Toaster position="top-center" />
+
+              <div
+                className={`transition-opacity duration-500 ${true ? "opacity-100" : "opacity-0"
+                  }`}
               >
-                <Route path="shop" element={<Shop />} />
-                <Route path="about" element={<About />} />
-                <Route path="cart" element={<Cart />} />
-                <Route path="checkout" element={<Checkout />} />
-                <Route path="order-confirmation" element={<Success />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="my-order" element={<Myorders />} />
-                <Route path="shop/:id" element={<ProductDetails />} />
-              </Route>
 
-              {/* Auth & public */}
-              <Route element={<CommonLayout />}>
-                <Route path="/login" element={<LoginSignup />} />
-                <Route path="/welcome" element={<Welcome />} />
-                <Route path="*" element={<NotFound />} />
-              </Route>
+                <BrowserRouter>
+                  {user ? user.role === "user" && <Header /> : <UserHeader />}
+                  <Routes>
+                    {/* Landing route */}
+                    <Route
+                      path="/"
+                      element={
+                        user ? (
+                          user.role === "admin" || user.role === "superAdmin" ? (
+                            <Navigate to="/admin" />
+                          ) : (
+                            <Home />
+                          )
+                        ) : (
+                          <Welcome />
+                        )
+                      }
+                    />
 
-              {/* Admin routes */}
-              <Route
-                element={
-                  <ProtectedRoute
-                    allowedRoles={["admin", "superAdmin"]}
-                    element={<AdminLayout />}
-                  />
-                }
-              >
-                <Route path="/admin" element={<Dashboard />} />
-                <Route path="/admin/orders" element={<Orders />} />
-                <Route path="/admin/retailers" element={<Retailers />} />
-                <Route path="/admin/products" element={<AllProducts />} />
-                <Route
-                  path="/admin/products/edit/:id"
-                  element={<EditProduct />}
-                />
-                <Route path="/admin/products/add" element={<AddProducts />} />
-                <Route
-                  path="/admin/products/categories"
-                  element={<AllCategory />}
-                />
-                <Route
-                  path="/admin/products/categories/add"
-                  element={<AddCategory />}
-                />
-                <Route
-                  path="/admin/products/categories/edit/:id"
-                  element={<EditCategory />}
-                />
-              </Route>
-            </Routes>
-          </BrowserRouter>
-        )}
-      </div>
+                    {/* User routes */}
+                    <Route
+                      element={
+                        <ProtectedRoute
+                          allowedRoles={["user", "retailer"]}
+                          element={<RetailerLayout />}
+                        />
+                      }
+                    >
+                      <Route path="shop" element={<Shop />} />
+                      <Route path="about" element={<About />} />
+                      <Route path="cart" element={<Cart />} />
+                      <Route path="checkout" element={<Checkout />} />
+                      <Route path="order-confirmation" element={<Success />} />
+                      <Route path="profile" element={<Profile />} />
+                      <Route path="my-order" element={<Myorders />} />
+                      <Route path="shop/:id" element={<ProductDetails />} />
+                    </Route>
+
+                    {/* Auth & public */}
+                    <Route element={<CommonLayout />}>
+                      <Route path="/login" element={<LoginSignup />} />
+                      <Route path="/welcome" element={<Welcome />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Route>
+
+                    {/* Admin routes */}
+                    <Route
+                      element={
+                        <ProtectedRoute
+                          allowedRoles={["admin", "superAdmin"]}
+                          element={<AdminLayout />}
+                        />
+                      }
+                    >
+                      <Route path="/admin" element={<Dashboard />} />
+                      <Route path="/admin/orders" element={<Orders />} />
+                      <Route path="/admin/retailers" element={<Retailers />} />
+                      <Route path="/admin/products" element={<AllProducts />} />
+                      <Route
+                        path="/admin/products/edit/:id"
+                        element={<EditProduct />}
+                      />
+                      <Route path="/admin/products/add" element={<AddProducts />} />
+                      <Route
+                        path="/admin/products/categories"
+                        element={<AllCategory />}
+                      />
+                      <Route
+                        path="/admin/products/categories/add"
+                        element={<AddCategory />}
+                      />
+                      <Route
+                        path="/admin/products/categories/edit/:id"
+                        element={<EditCategory />}
+                      />
+                    </Route>
+                  </Routes>
+                </BrowserRouter>
+
+              </div>
+            </>
+          )
+      }
     </>
   );
 }

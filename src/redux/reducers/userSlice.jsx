@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    loading: false,
+    loading: true,
     user: null,
     error: null,
   },

@@ -7,6 +7,7 @@ import { URL } from '../Common/api';
 import { config } from '../Common/configurations';
 import toast from 'react-hot-toast';
 import { getCart } from '../redux/actions/user/cartActions';
+import ProductPageSkeleton from '../components/products/ProductPageSkeleton';
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -137,9 +138,10 @@ const ProductPage = () => {
 
       {
         loading ?
-          (<div className="min-h-screen flex items-center justify-center">
-            Loading
-          </div>)
+        (
+      
+            <ProductPageSkeleton/>
+          )
           : product ?
             (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -231,9 +233,14 @@ const ProductPage = () => {
                   <div className="flex flex-wrap gap-4">
                     <button
                       onClick={addToCart}
-                      className="bg-mainclr hover:bg-mainhvr text-white px-6 py-3 rounded-md font-medium transition-colors disabled:opacity-50"
+                      className={` text-white px-6 py-3 rounded-md font-medium transition-colors disabled:opacity-50 uppercase ${cartLoading ? "bg-gray-500" :  "bg-mainclr hover:bg-mainhvr"} `}
                     >
-                      ADD TO CART ({count})
+                      {
+                        cartLoading ?
+                        "Adding to cart" :
+
+                      `ADD TO CART (${count})`
+                      }
                     </button>
                   </div>
 
@@ -245,7 +252,7 @@ const ProductPage = () => {
                       <p className="font-medium">Shipping Information:</p>
                       <ul className="list-disc pl-5 space-y-1 mt-2">
                         <li>All orders are shipped within 2-3 business days.</li>
-                        <li>All updates of your order will be shared on WhatsApp and email.</li>
+                        {/* <li>All updates of your order will be shared on WhatsApp and email.</li> */}
                       </ul>
                     </div>
                   </div>

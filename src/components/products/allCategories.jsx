@@ -105,15 +105,15 @@ const CategoriesCarousel = () => {
               prevEl: '.categories-prev',
               nextEl: '.categories-next',
             }}
-            pagination={{
-              clickable: true,
-              el: '.categories-pagination',
-              bulletClass: 'swiper-pagination-bullet',
-              bulletActiveClass: 'swiper-pagination-bullet-active',
-              renderBullet: (index, className) => {
-                return `<span class="${className} bg-indigo-400 hover:bg-mainclr w-3 h-3 mx-1 rounded-full transition-colors"></span>`;
-              },
-            }}
+            // pagination={{
+            //   clickable: true,
+            //   el: '.categories-pagination',
+            //   bulletClass: 'swiper-pagination-bullet',
+            //   bulletActiveClass: 'swiper-pagination-bullet-active',
+            //   renderBullet: (index, className) => {
+            //     return `<span class="${className} bg-indigo-400 hover:bg-mainclr w-3 h-3 mx-1 rounded-full transition-colors"></span>`;
+            //   },
+            // }}
             autoplay={{ delay: 3000, pauseOnMouseEnter: true }}
             breakpoints={{
               480: { slidesPerView: 3 },

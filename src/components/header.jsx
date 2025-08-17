@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { CgMenuRight } from "react-icons/cg";
 import { VscClose } from "react-icons/vsc";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { MdAccountCircle, MdLogout, MdManageAccounts, MdShoppingBag } from "react-icons/md";
 import { IoMdCart } from "react-icons/io";
 import AllcategModal from "../components/products/allCateogmodal";
@@ -22,6 +22,9 @@ const Header = () => {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [error, setError] = useState(null);
+
+  const location = useLocation();
+
 
   const { cart, loading } = useSelector(
     (state) => state.cart
@@ -156,20 +159,23 @@ const Header = () => {
 
           {/* Navigation (hidden on mobile) */}
           <nav className="hidden lg:flex space-x-8">
-            {menuItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`${item.active ? "text-gray-900" : "text-gray-500"
-                  } hover:text-mainclr px-3 py-2 text-sm font-medium`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`px-3 py-2 text-sm font-medium transition-colors duration-200 ${isActive ? "text-mainclr" : "text-gray-500 hover:text-mainclr"
+                    }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Login button and mobile menu button */}
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-2 md:gap-5">
             <button
               onClick={openModal}
               className="hidden lg:block w-full px-2 md:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr"
@@ -187,7 +193,7 @@ const Header = () => {
                 {
                   user.profileImgURL ?
                     <img
-                      className="w-12 aspect-square rounded-full object-cover"
+                      className="w-8 md:w-12 aspect-square rounded-full object-cover"
                       src={user?.profileImgURL}
                       alt="User"
                     />
@@ -209,7 +215,7 @@ const Header = () => {
                             alt="User"
                           />
                           : <MdAccountCircle className="text-3xl text-mainclr" />
-                    }
+                      }
                       <div className="ml-2">
                         <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                         {
@@ -287,17 +293,21 @@ const Header = () => {
           }`}
       >
         <div className="pt-2 pb-3 space-y-1 px-4 bg-white shadow-md">
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={`block pl-3 pr-4 py-2 text-base font-medium ${item.active ? "text-gray-900" : "text-gray-500"
-                } hover:bg-gray-50 hover:text-mainclr rounded-md transition-colors duration-200`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {item.name}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={`block pl-3 pr-4 py-2 text-base font-medium rounded-md transition-colors duration-200 ${isActive ? "text-mainclr bg-gray-100" : "text-gray-500 hover:text-mainclr"
+                  }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+
           <button
             onClick={openModal}
             className="w-full px-2 md:px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-mainclr hover:bg-mainhvr focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mainclr"
