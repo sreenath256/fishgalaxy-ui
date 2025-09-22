@@ -123,7 +123,7 @@ const LoginForm = ({ setActiveTab, setMobile }) => {
       // Handle OTP request failure
       // toast.error(res.response.data.error);
       setOTPLoading(false);
-      dispatch(updateError(res.response.data.error));
+      dispatch(updateError(res.response?.data?.error));
     }
 
 

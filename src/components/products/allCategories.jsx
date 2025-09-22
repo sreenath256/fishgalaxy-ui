@@ -55,7 +55,7 @@ const CategoriesCarousel = () => {
       {error && (
         <div className="text-center text-red-500 mb-4">
           {error}
-          <button 
+          <button
             onClick={fetchData}
             className="ml-2 text-blue-600 hover:text-blue-800"
           >
@@ -100,7 +100,7 @@ const CategoriesCarousel = () => {
             modules={[Navigation, Pagination, Autoplay]}
             spaceBetween={10}
             slidesPerView={2}
-            loop={categories.length > 1}
+            // loop={categories.length > 1}
             navigation={{
               prevEl: '.categories-prev',
               nextEl: '.categories-next',
@@ -122,28 +122,31 @@ const CategoriesCarousel = () => {
               1024: { slidesPerView: 6 },
             }}
           >
-            {categories.map((category) => (
-              <SwiperSlide key={category._id} className="pb-5">
-                <div 
-                  className="bg-white rounded-sm overflow-hidden hover:shadow-sm transition-shadow duration-300 h-full flex flex-col border border-gray-100 group cursor-pointer"
-                  onClick={() => handleCategoryClick(category.name)}
-                >
-                  <div className="aspect-square overflow-hidden relative">
-                    <img
-                      src={category.imgURL || NoImage}
-                      alt={category.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                 
-                    />
+            {categories.map((category) => {
+              if (category.name === 'Uncategorized') return null;
+              return (
+                <SwiperSlide key={category._id} className="pb-5">
+                  <div
+                    className="bg-gray-200 rounded-lg overflow-hidden hover:shadow-sm transition-shadow duration-300 h-full flex flex-col border border-gray-100 group cursor-pointer"
+                    onClick={() => handleCategoryClick(category.name)}
+                  >
+                    <div className="aspect-square overflow-hidden relative">
+                      <img
+                        src={category.imgURL || NoImage}
+                        alt={category.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+
+                      />
+                    </div>
+                    <div className="p-4 flex-grow flex flex-col items-center">
+                      <h3 className="font-medium text-sm text-center text-gray-800 group-hover:text-mainclr transition-colors">
+                        {category.name}
+                      </h3>
+                    </div>
                   </div>
-                  <div className="p-4 flex-grow flex flex-col items-center">
-                    <h3 className="font-medium text-sm text-center text-gray-800 group-hover:text-mainclr transition-colors">
-                      {category.name}
-                    </h3>
-                  </div>
-                </div>
-              </SwiperSlide>
-            ))}
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
         )}
       </div>

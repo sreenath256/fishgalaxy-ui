@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AiOutlinePlus, AiOutlineEdit } from "react-icons/ai";
+import { AiOutlinePlus, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getCategories } from "../../redux/actions/admin/categoriesAction";
@@ -8,6 +8,7 @@ import FilterArray from "../../components/admin/FilterArray";
 import Pagination from "../../components/admin/Pagination";
 import StatusComponent from "../../components/admin/StatusComponent";
 import SearchBar from "../../components/admin/SearchBar";
+import { deleteCategory as deleteCategoryFunction } from "../../redux/actions/admin/categoriesAction";
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -20,6 +21,9 @@ const Categories = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // For delete confirmation
+  const [deleteCategory, setDeleteCategory] = useState(null);
 
   const handleFilter = (type, value) => {
     const params = new URLSearchParams(window.location.search);
@@ -40,8 +44,8 @@ const Categories = () => {
       }
     }
 
-    if(type === 'search'){
-      params.delete('page')
+    if (type === "search") {
+      params.delete("page");
     }
     setSearchParams(params.toString() ? "?" + params.toString() : "");
   };
@@ -52,6 +56,15 @@ const Categories = () => {
     const pageNumber = params.get("page");
     setPage(parseInt(pageNumber || 1));
   }, [searchParams]);
+
+  const cancelDelete = () => {
+    setDeleteCategory(null);
+  };
+
+  const confirmDelete = () => {
+    dispatch(deleteCategoryFunction(deleteCategory._id));
+    setDeleteCategory(null);
+  };
 
   return (
     <>
@@ -85,7 +98,7 @@ const Categories = () => {
             </div>
           ) : (
             categories && (
-              <table className="w-full min-w-max table-auto ">
+              <table className="w-full min-w-max table-auto">
                 <thead className="font-normal">
                   <tr className="border-b border-gray-200">
                     <th className="font-semibold p-4 text-left">Name</th>
@@ -137,14 +150,29 @@ const Categories = () => {
                           />
                         </td>
                         <td className="text-sm p-4">
-                          <div className="flex items-center gap-2 text-lg">
-                            <span
-                              className="hover:text-gray-500"
-                              onClick={() => navigate(`edit/${category._id}`)}
-                            >
-                              <AiOutlineEdit />
-                            </span>
-                          </div>
+                          {
+
+                            category.name !== "Uncategorized" && (
+
+                              <div
+                                className="flex items-center gap-3 text-lg"
+                                onClick={(e) => e.stopPropagation()} // prevent row click
+                              >
+                                <span
+                                  className="hover:text-gray-500 cursor-pointer"
+                                  onClick={() => navigate(`edit/${category._id}`)}
+                                >
+                                  <AiOutlineEdit />
+                                </span>
+                                <span
+                                  className="text-red-600 cursor-pointer"
+                                  onClick={() => setDeleteCategory(category)}
+                                >
+                                  <AiOutlineDelete />
+                                </span>
+                              </div>
+                            )
+                          }
                         </td>
                       </tr>
                     );
@@ -163,6 +191,33 @@ const Categories = () => {
           />
         </div>
       </div>
+
+      {/* Delete Confirmation Popup */}
+      {deleteCategory && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 className="text-lg font-medium mb-4">Confirm Deletion</h3>
+            <p className="mb-6">
+              Are you sure you want to delete "{deleteCategory.name}"? This
+              action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

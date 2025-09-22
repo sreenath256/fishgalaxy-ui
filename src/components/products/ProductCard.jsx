@@ -38,7 +38,7 @@ const ProductCard = ({ product, key, isLatestProduct = false, isOfferProduct = f
 
     return (
         <Link to={`/shop/${product._id}`} key={key}>
-            <div className="bg-white rounded-sm overflow-hidden hover:shadow-sm transition-shadow duration-300 h-full flex flex-col border border-gray-100 group">
+            <div className="bg-gray-200 rounded-lg overflow-hidden hover:shadow-sm transition-shadow duration-300 h-full flex flex-col border border-gray-100 group">
                 {/* Product Image */}
                 <div className="aspect-square overflow-hidden relative">
                     <img
@@ -78,7 +78,7 @@ const ProductCard = ({ product, key, isLatestProduct = false, isOfferProduct = f
                     {/* Pricing */}
                     <div className="mt-2 text-center">
                         <div className="flex justify-center items-center gap-2">
-                            <span className="font-medium text-mainclr">
+                            <span className="font-medium text-xl text-green-600">
                                 ₹{product.offer}
                             </span>
                             {product.offer < product.price && (
@@ -92,7 +92,7 @@ const ProductCard = ({ product, key, isLatestProduct = false, isOfferProduct = f
 
 
                         {/* Add to Cart Button */}
-                        <button
+                        {/* <button
                             className="mt-3 w-full text-sm bg-mainclr hover:bg-mainhvr text-white py-2 px-4 rounded-sm transition-colors flex items-center justify-center gap-2"
                             onClick={(e) => {
                                 e.preventDefault();
@@ -102,7 +102,7 @@ const ProductCard = ({ product, key, isLatestProduct = false, isOfferProduct = f
                         >
                             <IoMdCart />
                             {cartLoading ? "Adding..." : "Add to Cart"}
-                        </button>
+                        </button> */}
                     </div>
                 </div>
             </div>

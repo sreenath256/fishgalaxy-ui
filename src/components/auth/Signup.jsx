@@ -40,7 +40,7 @@ const SignupForm = ({ showPassword, setShowPassword, setActiveTab }) => {
     const validationSchema = Yup.object().shape({
         name: Yup.string().required("Full name is required"),
         shopName: Yup.string().required("Shop name is required"),
-        email: Yup.string().email("Invalid email"),
+        email: Yup.string().email("Invalid email").required("Pincode is required"),
         mobile: Yup.string()
             .required("Mobile number is required")
             .matches(/^\+?[1-9]\d{7,14}$/, "Enter a valid phone number"),

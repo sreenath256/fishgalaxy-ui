@@ -1,5 +1,6 @@
 import React from 'react';
 import { pr1 } from '../assets';
+import { Link } from 'react-router-dom';
 
 const About = () => {
   return (
@@ -31,7 +32,7 @@ const About = () => {
               We believe in quality, integrity, and going the extra mile.
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-4 mb-10">
               <div className="flex items-start">
                 <div className="flex-shrink-0 mt-1">
                   <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -58,9 +59,9 @@ const About = () => {
               </div>
             </div>
 
-            <button className="mt-8 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-              Learn More About Our Team
-            </button>
+            <Link className="mt-8 px-6  py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+             Shop Now
+            </Link>
           </div>
         </div>
       </div>

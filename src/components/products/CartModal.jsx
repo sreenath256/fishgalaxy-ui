@@ -123,12 +123,12 @@ const CartModal = ({ isOpen, onClose, children }) => {
                       </h3>
                       <div className="flex">
                         <p className="text-sm font-medium">
-                          ₹{product.product.offer * product.quantity}
+                          ₹{( product.product.offer * product.quantity).toFixed(2)}
                         </p>
                       </div>
                     </div>
-                    <p className="text-sm font-medium">
-                      ₹{product.product.offer}
+                    <p className="text-sm font-medium mb-3">
+                      ₹{product.product.offer.toFixed(2)}
                     </p>
                     <ProductQuantityButton
                       toggleProductConfirm={toggleProductConfirm}
@@ -176,7 +176,7 @@ const CartModal = ({ isOpen, onClose, children }) => {
             <div className="border-t pt-4">
               <div className="flex justify-between mb-2">
                 <span>Subtotal:</span>
-                <span className="font-medium">₹{totalPrice}</span>
+                <span className="font-medium">₹{totalPrice.toFixed(2)}</span>
               </div>
               <p className="text-xs text-gray-500 mb-4">
                 Shipping and taxes calculated at checkout

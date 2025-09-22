@@ -16,6 +16,9 @@ import { EmptyCart } from "../assets/index";
 import ConfirmBox from "../components/admin/ConfrimBox";
 import { GoPlus } from "react-icons/go";
 import { BarLoader } from "react-spinners";
+import axios from "axios";
+import { URL } from "../Common/api";
+import { config } from "../Common/configurations";
 
 const CartPage = () => {
   const dispatch = useDispatch();
@@ -233,62 +236,86 @@ export default CartPage;
 
 
 const QuantityUpdateBar = ({ item }) => {
-  const { cart, loading, cartId, totalPrice } = useSelector(
-    (state) => state.cart
-  );
+  const { cartId } = useSelector((state) => state.cart);
+  const dispatch = useDispatch();
 
-  const dispatch = useDispatch()
-  const [buttonLoading, setButtonLoading] = useState(false)
+  const [buttonLoading, setButtonLoading] = useState(false);
+  const [tempQuantity, setTempQuantity] = useState(item.quantity);
 
-  const incrementQuantity = async (id) => {
-    setButtonLoading(true)
-    if (id) {
-      const res = await dispatch(
-        incrementCount({ cartId, productId: id })
+  // ✅ Keep tempQuantity in sync with Redux cart updates
+  useEffect(() => {
+    setTempQuantity(item.quantity);
+  }, [item.quantity]);
+
+  // ✅ Direct update handler
+  const updateQuantity = async (newQuantity) => {
+    if (newQuantity < 1) newQuantity = 1;
+    setButtonLoading(true);
+
+    try {
+      await axios.post(
+        `${URL}/user/cart`,
+        {
+          product: item.product._id,
+          quantity: newQuantity,
+          size: item.size,
+        },
+        { ...config, withCredentials: true }
       );
+
+      dispatch(getCart()); // refresh Redux cart
+    } catch (error) {
+      const err =
+        error?.response?.data?.error || error?.message || "Something went wrong";
+      toast.error(err);
+    } finally {
+      setButtonLoading(false);
     }
-
-    setButtonLoading(false)
   };
-
-  const decrementQuantity = async (id) => {
-    setButtonLoading(true)
-    if (id) {
-      const res = await dispatch(
-        decrementCount({ cartId, productId: id })
-      );
-    }
-    setButtonLoading(false)
-
-  };
-
-
 
   return (
     <div
-      className={`flex h-fit  items-center border border-black rounded-lg overflow-hidden text-sm ${buttonLoading && "!border-0"
-        } `}
+      className={`flex h-fit items-center border border-black rounded-lg overflow-hidden text-sm ${
+        buttonLoading && "!border-0"
+      }`}
     >
       {buttonLoading ? (
         <BarLoader color="#00756b" width={"72px"} height={"24px"} />
       ) : (
         <>
+          {/* Decrement */}
           <button
-            className={`w-6 grid place-items-center h-6 ${item.quantity === 1
-              ? "bg-black text-white cursor-not-allowed"
-              : "bg-black hover:bg-white text-white hover:text-black cursor-pointer"
-              } duration-200`}
-            disabled={item.quantity === 1 || buttonLoading}
-            onClick={() => decrementQuantity(item.product._id)}
+            className={`w-6 grid place-items-center h-6 ${
+              tempQuantity === 1
+                ? "bg-black text-white cursor-not-allowed"
+                : "bg-black hover:bg-white text-white hover:text-black cursor-pointer"
+            } duration-200`}
+            disabled={tempQuantity === 1 || buttonLoading}
+            onClick={() => updateQuantity(tempQuantity - 1)}
           >
             <FiMinus />
           </button>
-          <span className="w-6 grid place-items-center h-6">
-            {item.quantity}
-          </span>
+
+          {/* Editable input */}
+          <input
+            type="number"
+            min="1"
+            value={tempQuantity}
+            onChange={(e) => setTempQuantity(Number(e.target.value))}
+            onBlur={() => updateQuantity(Number(tempQuantity))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                updateQuantity(Number(tempQuantity));
+                e.target.blur();
+              }
+            }}
+            className="w-10 text-center outline-none"
+          />
+
+          {/* Increment */}
           <button
-            className={`w-6 grid place-items-center h-6 bg-black hover:bg-white text-white hover:text-black cursor-pointer duration-200`}
-            onClick={() => incrementQuantity(item.product._id)}
+            className="w-6 grid place-items-center h-6 bg-black hover:bg-white text-white hover:text-black cursor-pointer duration-200"
+            onClick={() => updateQuantity(tempQuantity + 1)}
             disabled={buttonLoading}
           >
             <GoPlus />
@@ -296,5 +323,6 @@ const QuantityUpdateBar = ({ item }) => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
+

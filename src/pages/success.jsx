@@ -144,13 +144,7 @@ if (!orderData) {
           </Link>
         </motion.div>
 
-        {/* Additional Help Text */}
-        <motion.p
-          className="text-sm text-gray-500 mt-6"
-          variants={textVariants}
-        >
-          Need help? <Link to="/contact" className="text-blue-600 hover:underline">Contact us</Link>
-        </motion.p>
+       
       </div>
     </motion.div>
   );

@@ -53,8 +53,9 @@ const BestOffers = () => {
 
   return (
     <div className="py-12 bg-gray-50 relative">
+       
       <div className='flex justify-between items-center w-[98%] md:w-11/12 mx-auto mb-8'>
-        <h2 className="text-2xl lg:text-3xl font-medium text-mainclr">
+        <h2 className="text-2xl lg:text-3xl font-medium text-black">
           {isLoading ? <Skeleton width={150} /> : 'Best Offers'}
         </h2>
         {!isLoading && !error && (
