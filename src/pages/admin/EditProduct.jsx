@@ -321,17 +321,18 @@ const EditProduct = () => {
           <div className="lg:w-2/6">
             <div className="admin-div">
               <h1 className="font-bold">Product Pricing</h1>
-              <p className="admin-label">Amount</p>
+              <p className="admin-label">MRP</p>
               <input
                 type="number"
                 name="price"
                 placeholder="Type product name here"
                 className="admin-input"
                 value={fetchedData.price || ""}
+                required
                 onChange={handleInputChange}
               />
 
-              <p className="admin-label">Offer</p>
+              <p className="admin-label">Sale Price</p>
               <input
                 type="number"
                 name="offer"
@@ -339,6 +340,7 @@ const EditProduct = () => {
                 className="admin-input"
                 value={fetchedData.offer || ""}
                 min={1}
+                required
                 max={99}
                 onChange={handleInputChange}
               />

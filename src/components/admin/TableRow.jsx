@@ -62,12 +62,7 @@ const TableRow = ({ index, length, product }) => {
         >
           {product?.category?.name || ""}
         </td>
-        <td 
-          className="admin-table-row"
-          onClick={() => navigate(`edit/${product._id}`)}
-        >
-          {product.stockQuantity}
-        </td>
+      
         <td 
           className="admin-table-row"
           onClick={() => navigate(`edit/${product._id}`)}

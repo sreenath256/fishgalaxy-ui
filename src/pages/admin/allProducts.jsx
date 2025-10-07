@@ -163,7 +163,6 @@ const Products = () => {
                     <th className="admin-table-head w-3/12">Name</th>
                     <th className="admin-table-head w-3/12">Description</th>
                     <th className="admin-table-head w-1/12">Category</th>
-                    <th className="admin-table-head w-1/12">Quantity</th>
                     <th className="admin-table-head w-1/12">Price</th>
                     <th className="admin-table-head w-1/12">Status</th>
                     <th className="admin-table-head w-1/12">Added</th>
