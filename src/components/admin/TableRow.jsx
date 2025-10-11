@@ -69,6 +69,12 @@ const TableRow = ({ index, length, product }) => {
         >
           {product.price}
         </td>
+         <td 
+          className="admin-table-row"
+          onClick={() => navigate(`edit/${product._id}`)}
+        >
+          {product.offer}
+        </td>
         <td 
           className="admin-table-row capitalize shrink-0"
           onClick={() => navigate(`edit/${product._id}`)}
