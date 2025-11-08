@@ -10,10 +10,15 @@ import SearchBar from "../../components/admin/SearchBar";
 import RangeDatePicker from "../../components/admin/DateRangePicker";
 import ClearFilterButton from "../../Components/admin/ClearFilterButton";
 import { getCategories } from "../../redux/actions/admin/categoriesAction";
+import toast from "react-hot-toast"; // if not already imported
+import CategoryReorderModal from "../../components/admin/CategoryReorderModal";
+
 
 const Products = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const [showReorderModal, setShowReorderModal] = useState(false);
 
   const { products, loading, error, totalAvailableProducts } = useSelector(
     (state) => state.products
@@ -61,7 +66,7 @@ const Products = () => {
         }
       }
     }
-    if(type ==="category"){
+    if (type === "category") {
       params.delete("page")
     }
     setSearchParams(params.toString() ? "?" + params.toString() : "");
@@ -99,7 +104,7 @@ const Products = () => {
           search={search}
           setSearch={setSearch}
         />
-        <div className="flex justify-between items-center font-semibold">
+        <div className="flex justify-between items-center font-semibold space-y-2">
           <div>
             <h1 className="font-bold text-2xl">Products</h1>
           </div>
@@ -110,6 +115,12 @@ const Products = () => {
             >
               <AiOutlinePlus />
               Add Product
+            </button>
+            <button
+              className="admin-button-fl bg-gray-700 text-white"
+              onClick={() => setShowReorderModal(true)}
+            >
+              Arrange Order
             </button>
           </div>
         </div>
@@ -233,6 +244,28 @@ const Products = () => {
           </div>
         </div>
       </div>
+      {showReorderModal && (
+        <CategoryReorderModal
+          categories={categories}
+          onClose={() => setShowReorderModal(false)}
+          onReorderSuccess={() => {
+            // Clear all filters
+            const params = new URLSearchParams();
+            setSearchParams(""); // Clear URL
+            setSearch("");
+            setSelectedCategory("");
+            setPage(1);
+
+            // Refetch categories and products freshly
+            dispatch(getCategories("page=1&limit=1000"));
+            dispatch(getProducts(""));
+
+            // toast.success("Category order updated successfully!");
+            setShowReorderModal(false);
+          }}
+        />
+      )}
+
     </>
   );
 };
